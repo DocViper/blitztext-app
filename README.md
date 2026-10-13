@@ -1,157 +1,175 @@
-# Blitztext App
+<p align="center">
+  <img src="docs/assets/icon.png" width="96" height="96" alt="Blitztext app icon">
+</p>
 
-Blitztext App is an experimental open-source macOS menubar app for turning speech into text.
+<h1 align="center">Blitztext</h1>
 
-It is intentionally small and unfinished. The goal is to make a real workflow visible and hackable: press a hotkey, speak, get text back, optionally rewrite it, and paste it into the app you were using.
+<p align="center">
+  <b>Speak. Text. Done.</b><br>
+  Dictation for your Mac that runs entirely on your Mac.
+</p>
 
-This is a learning and experimentation project, not a polished product.
+<p align="center">
+  <a href="https://github.com/cmagnussen/blitztext-app/releases/latest"><img src="https://img.shields.io/github/v/release/cmagnussen/blitztext-app?label=download&color=4F46E5" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/macOS-14%2B-111111?logo=apple" alt="macOS 14 or newer">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2563EB" alt="MIT License"></a>
+  <a href="https://github.com/cmagnussen/blitztext-app/actions/workflows/ci.yml"><img src="https://github.com/cmagnussen/blitztext-app/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+</p>
 
-> Preview status: bring your own OpenAI API key, no hosted backend, no warranty, no support guarantee.
+<p align="center">
+  <a href="https://github.com/cmagnussen/blitztext-app/releases/latest"><b>Download for macOS</b></a> ·
+  <a href="https://blitztext.de">blitztext.de</a> ·
+  <a href="#build-it-yourself">Build it yourself</a>
+</p>
 
-## What It Does
+<p align="center">
+  <img src="docs/screenshots/menu-bar.png" width="400" alt="Blitztext in the menu bar: four modes, each with its own shortcut, everything local">
+  <img src="docs/screenshots/settings-modes.png" width="400" alt="Settings, Modi: the writing modes and a mode per app or website such as Gmail">
+</p>
 
-- **Blitztext**: record speech and transcribe it.
-- **Blitztext+**: record speech, transcribe it, then turn the rough draft into cleaner writing.
-- **Blitztext $%&!**: turn frustrated speech into a calmer message.
-- **Blitztext :)**: add fitting emojis to dictated text.
+Hold a shortcut, speak, let go. Blitztext turns your speech into text and pastes it where your cursor is. Speech recognition runs on your Mac, the writing modes use Apple Intelligence on your Mac. No account, no server, no audio leaving the device.
 
-## Important Preview Notes
+## Why Blitztext?
 
-- macOS only.
-- Bring your own OpenAI API key.
-- No hosted Blitztext backend is included or provided.
-- In online mode, audio and text are sent directly from the app to the OpenAI API.
-- Optional local transcription via WhisperKit/CoreML if you install a compatible model locally.
-- `./build.sh` creates a locally ad-hoc-signed development app. No notarized release binary is provided.
-- Not production ready.
-- No warranty and no support guarantee.
+- **Private:** your voice never leaves your Mac. No account, no backend, no telemetry.
+- **Native:** a small menu bar app in Swift, made for macOS, fast on Apple silicon.
+- **More than dictation:** four modes turn rough speech into clean text, a calm message or a message with emojis.
+- **Free and open:** MIT licensed. Use it, learn from it, build on it.
 
-You are welcome to use, fork, adapt, and share this project under the license terms.
+## How It Works
 
-The intent is not to ship a one-click finished app. The intent is to make a real AI workflow understandable: clone it, build it, read the code, change it, break it, fix it, and suggest improvements. If you only want to download something and never look inside, this preview will probably feel rough. If you want to learn how a small native macOS AI app is put together, you are in the right place.
+1. **Hold** a shortcut, for example `fn + Shift`.
+2. **Speak** in any language your model knows.
+3. **Let go.** Blitztext transcribes on your Mac with Parakeet or Whisper.
+4. **Done.** The text appears at your cursor, fitted to the text around it. Your clipboard is restored afterwards.
+
+## Modes
+
+| Mode | Shortcut | What happens |
+|---|---|---|
+| **Blitztext** | `fn + Shift` | Speech to exact text |
+| **Blitztext+** | `fn + Control` | Speech to clean written text |
+| **Blitztext $%&!** | `fn + Option` | Frustrated speech to a calm, effective message |
+| **Blitztext :)** | `fn + Cmd` | Text with fitting emojis |
+
+Keyboards without `fn`: set your own shortcut per mode in the settings.
+
+## Features
+
+- **Local speech recognition:** NVIDIA Parakeet v3 (fast, 25 European languages) or OpenAI Whisper via WhisperKit (about 100 languages). Both detect the spoken language.
+- **Local writing modes:** Blitztext+, $%&! and :) run with Apple Intelligence on your Mac (macOS 26). Optionally bring your own model provider: OpenAI, Anthropic, Google Gemini, Mistral, OpenRouter, or a local server such as Ollama or LM Studio.
+- **Fits where you type:** spaces and capitals follow the text around your cursor, also mid-sentence. Password fields are never read.
+- **Mode per app or website:** Gmail always Blitztext+, Slack with emojis, everything else word for word.
+- **Sound off while recording:** a podcast or music is muted while you speak and back right after.
+- **Voice memos and WhatsApp voice messages:** drop an audio file on Blitztext and get the text, optionally with paragraphs.
+- **Dictionary:** names and terms spelled your way, fixed replacements ("n acht n" becomes "n8n").
+- **History:** recent results, encrypted and stored only on your Mac.
+- **Updates in the app:** Blitztext offers new versions from this repository's releases, signed and notarized by Apple.
 
 ## Screenshots
 
-<table>
-  <tr>
-    <td><img src="docs/screenshots/online-mode.png" alt="Blitztext online transcription mode" width="420"></td>
-    <td><img src="docs/screenshots/local-mode.png" alt="Blitztext secure local transcription mode" width="420"></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/local-model-picker.png" alt="Blitztext local model picker" width="420"></td>
-    <td><img src="docs/screenshots/settings-customize.png" alt="Blitztext settings and customization view" width="420"></td>
-  </tr>
-</table>
+| | |
+|---|---|
+| <img src="docs/screenshots/settings-models.png" width="400" alt="Settings, Modelle: local speech recognition and the AI modes"> | <img src="docs/screenshots/settings-general.png" width="400" alt="Settings, Allgemein: how Blitztext works, shortcuts, sound off while recording"> |
+| Speech recognition and AI modes on your Mac | How Blitztext works, shortcuts, sound off while recording |
 
-## Requirements
+The app is in German for now.
 
-- macOS 14 or newer
-- Xcode 16 or newer (Swift 5.10), with Command Line Tools installed and selected for `xcodebuild`
-- [XcodeGen](https://github.com/yonaskolb/XcodeGen) to generate the Xcode project
-- For online transcription and rewriting: an OpenAI API key with access to:
-  - `whisper-1` for transcription
-  - `gpt-4o-mini` and optionally `gpt-4o` for rewriting
-- For local-only transcription: a WhisperKit CoreML model in:
-  `~/Library/Application Support/Blitztext/models/whisperkit/`
+## Install
 
-The build also pulls one Swift Package dependency automatically:
+1. Open the [latest release](https://github.com/cmagnussen/blitztext-app/releases/latest), download the ZIP under "Assets", unpack it and move **Blitztext.app** to **Applications**.
+2. Open Blitztext. It lives in the menu bar.
+3. Allow **Microphone** and **Accessibility** (needed to paste into other apps).
+4. In the settings (**Modelle**), load a local speech model once. Parakeet v3 is recommended on Apple silicon, about 500 MB.
+5. Hold `fn + Shift`, speak, let go.
 
-- [`argmax-oss-swift`](https://github.com/argmaxinc/argmax-oss-swift) (WhisperKit) — used for local on-device transcription.
+**Requirements:** macOS 14 or newer. Parakeet needs Apple silicon; Intel Macs use Whisper. The writing modes on the device need macOS 26 with Apple Intelligence turned on; without it, add your own model provider or use plain dictation.
 
-Install XcodeGen if needed:
+## Privacy
 
-```bash
-brew install xcodegen
+```text
+Speech recognition:  your Mac (Parakeet or Whisper, Core ML / Neural Engine)
+Writing modes:       your Mac (Apple Intelligence)
+                     or, if you add one, your own model provider with your own API key
+Model download:      Hugging Face, once per model
+Update check:        GitHub releases of this repository (can be turned off)
 ```
 
-## Build And Run
+Blitztext has no backend and collects no data. Details in [docs/privacy.md](docs/privacy.md).
+
+## Known Limitations
+
+- **`fn` shortcuts** only work on Apple keyboards. Set your own shortcut for other keyboards.
+- **Paste stops after an update or a rebuild:** open System Settings > Privacy & Security > Accessibility, remove the old Blitztext entry, add the current app and restart it.
+- **First dictation after a macOS update** can take a few minutes while macOS prepares the model for the Neural Engine. Blitztext shows a hint; keep it running.
+- **Whisper on silence** sometimes invents phrases like "Thank you." Blitztext filters the known ones.
+- **Macs managed with Jamf:** in-app updates are off on the whole Mac, also for a copy you installed yourself. There, your device management handles updates.
+
+More in [docs/setup.md](docs/setup.md) and [docs/local-models.md](docs/local-models.md).
+
+## Build It Yourself
+
+You need Xcode 26 or newer (for the Apple Intelligence APIs) and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
 
 ```bash
 git clone https://github.com/cmagnussen/blitztext-app.git
 cd blitztext-app
-./build.sh --run
-```
-
-For a local install into `/Applications`:
-
-```bash
 ./build.sh --install --run
 ```
 
-The generated `.app` is ad-hoc signed for local development only. Do not treat it as a trusted redistributable binary. A public binary release would need Developer ID signing and notarization.
-
-On first launch, either paste your own OpenAI API key for online workflows or install a WhisperKit CoreML model for local transcription. Rewriting workflows still require OpenAI.
-
-For fully local transcription, install a WhisperKit CoreML model and enable **Sicherer Lokaler Modus** in the app.
-
-For a slower, more explicit walkthrough, see [docs/setup.md](docs/setup.md).
-
-## Permissions
-
-Blitztext asks for:
-
-- **Microphone**: to record your voice.
-- **Accessibility**: to paste the result back into the app you were using.
-
-If you do not grant Accessibility permission, you can still copy results manually.
-
-Full Disk Access is not required. If auto-paste does not work even though transcription succeeds, open **System Settings -> Privacy & Security -> Accessibility**, enable Blitztext there, restart Blitztext, and try again with the cursor focused in a text field. If macOS shows multiple Blitztext entries, remove or disable the old ones and grant the permission to the app you just built or installed.
-
-## Data Flow
-
-The preview has no custom backend.
+`build.sh` creates an ad-hoc signed app for your own Mac. If you publish a fork, use your own bundle identifier, name and icon (see [TRADEMARKS.md](TRADEMARKS.md)) and sign it with your own Developer ID.
 
 ```text
-Online transcription: Your Mac -> OpenAI Audio Transcriptions API
-Text rewriting:       Your Mac -> OpenAI Chat Completions API
-Local transcription:  Your Mac -> WhisperKit/CoreML on device
+BlitztextMac/        macOS menu bar app (SwiftUI, AppKit)
+  App/               app state and lifecycle
+  Features/          workflows, menu bar, settings, audio files, release notes
+  Services/          recording, hotkeys, local transcription, paste, history, updates
+  Views/             shared UI pieces
+  Tests/             unit tests: post-processing, cursor fit, paragraphs, filters
+BlitztextShared/     code shared with the (not yet public) iOS app
+  AI/                model providers, Apple Intelligence rewriting, mode prompts
+  Audio/             audio file conversion
+  Transcription/     Whisper call and filter for invented text
+  Design/            design tokens, Public Sans
+  Licenses/          bundled third-party licenses
+build.sh             local build script
 ```
-
-The app stores your OpenAI API key in the user's macOS Keychain.
-
-Read [docs/privacy.md](docs/privacy.md) before using the preview with sensitive content.
-
-## Project Structure
-
-```text
-BlitztextMac/
-  App/          App lifecycle and paste handling
-  Features/     Workflows, menu bar UI, settings
-  Services/     Recording, OpenAI calls, hotkeys, local storage
-  Views/        Shared SwiftUI views
-build.sh        Local build script
-docs/           Setup, privacy, roadmap, preflight, landing page notes
-```
-
-## Local Models
-
-Local transcription is available as an experimental WhisperKit/CoreML path. The app does not bundle a model; choose one in the app, click install, and then switch on **Sicherer Lokaler Modus** from the menu bar or settings.
-
-See [docs/local-models.md](docs/local-models.md).
 
 ## Contributing
 
-Contributions are welcome, especially if they make the preview easier to build, understand, or fork.
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md), and see [ROADMAP.md](ROADMAP.md) for what comes next.
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+Thanks to everyone whose pull requests shaped this version, among them automatic paragraphs (#21), build fixes (#5, #16) and a cancellation fix (#10).
 
-## Support And Roadmap
+## From the Community
 
-This preview has no formal support promise. See [SUPPORT.md](SUPPORT.md) for how to ask for help without sharing secrets.
+Independent projects built on the Blitztext idea. They are not maintained or reviewed by Blackboat.
 
-The current direction is documented in [ROADMAP.md](ROADMAP.md). Maintainer-facing release checks live in [docs/open-source-preflight.md](docs/open-source-preflight.md).
+- Linux (KDE/Wayland): [TimInTech/blitztext-linux](https://github.com/TimInTech/blitztext-linux)
+- Windows with voice notes: [danielstefanmueller/Blitznotiz](https://github.com/danielstefanmueller/Blitznotiz)
+- Windows (.NET 8): [echobrain-de/blitztext](https://github.com/echobrain-de/blitztext)
+- Fork with history, meetings and a team server: [mschnitzler-creator/blitztext-app-v2](https://github.com/mschnitzler-creator/blitztext-app-v2)
+
+## Acknowledgments
+
+- **[Handy](https://github.com/cjpais/handy)** for the transcript post-processing and the clipboard restore Blitztext builds on
+- **[Amical](https://github.com/amicalhq/amical)** for ideas on cursor context, website modes and invented Whisper text
+- **[FluidAudio](https://github.com/FluidInference/FluidAudio)** and **NVIDIA** for Parakeet on Core ML
+- **[WhisperKit](https://github.com/argmaxinc/argmax-oss-swift)** by Argmax and **OpenAI** for Whisper
+- **[Sparkle](https://sparkle-project.org)** for updates
+- **Community contributors** who send fixes and ideas
+
+Full license texts: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), also inside the app (Settings > Allgemein > Über Blitztext).
 
 ## License
 
-Code is released under the MIT License. See [LICENSE](LICENSE).
+MIT License, see [LICENSE](LICENSE). Free and open source, built and maintained by Blackboat alongside our client work, without warranty and without guaranteed support.
 
-Project names, logos, and app icons are not automatically granted as trademarks or brand assets. See [TRADEMARKS.md](TRADEMARKS.md).
+The Blitztext name, logo, icon and brand assets are not open source. Forks and redistributions must use their own branding and must not imply endorsement by Blackboat, see [TRADEMARKS.md](TRADEMARKS.md).
 
 ## Legal / Impressum & Datenschutz
 
-This is an experimental, non-commercial open-source project, provided as-is under the MIT License without warranty or support. Nothing is sold here and no installation or operation is performed on your behalf.
-
-The companion website (blitztext.de) is operated by Blackboat Internet GmbH:
+The signed release builds and the website blitztext.de are published by Blackboat Internet GmbH.
 
 - Impressum: https://www.blackboat.com/impressum
 - Datenschutz / Privacy: https://www.blackboat.com/datenschutz
