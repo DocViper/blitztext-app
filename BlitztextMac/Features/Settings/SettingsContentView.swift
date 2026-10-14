@@ -450,7 +450,7 @@ struct CustomizeSettingsView: View {
     }
 
     private var localModelOptions: [LocalTranscriptionModel] {
-        LocalTranscriptionService.modelOptions()
+        LocalTranscriptionService.modelOptions(selected: appState.selectedLocalModelName)
     }
 
     private var installedModelsText: String {
@@ -617,7 +617,7 @@ struct CustomizeSettingsView: View {
                         set: { appState.appSettings.selectedLocalTranscriptionModelName = $0 }
                     )) {
                         ForEach(localModelOptions) { model in
-                            Text("\(model.displayName) · \(model.installStateLabel)").tag(model.id)
+                            Text(model.pickerLabel).tag(model.id)
                         }
                     }
                     .labelsHidden()

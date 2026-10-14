@@ -1,74 +1,16 @@
 # Third-Party Notices
 
-## Transcript cleanup and clipboard restore
-
-Parts of the macOS app are adapted from code under the MIT License:
-
-- `BlitztextMac/Services/TranscriptPostProcessor.swift`: custom term correction and filler word removal
-- `BlitztextMac/Services/ClipboardPasteService.swift`: receipt-based clipboard restore
-
-```text
-MIT License
-
-Copyright (c) 2025 CJ Pais
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
-## Sound muting and browser address
-
-Parts of the macOS app follow code under the MIT License:
-
-- `BlitztextMac/Services/SystemAudioMuter.swift`: muting the sound output while recording, with volume 0 as fallback
-- `BlitztextMac/Services/FocusedFieldReader.swift`: reading the browser address through the Accessibility API with `AXManualAccessibility`
-
-```text
-MIT License
-
-Copyright (c) 2025 Naomi Chopra, Haritabh Singh
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
 ## FluidAudio
 
 Local Parakeet transcription uses FluidAudio (https://github.com/FluidInference/FluidAudio), licensed under the Apache License 2.0.
 
+## Parakeet Ultra
+
+The local model "Parakeet Ultra" is moondream/parakeet-ultra (https://huggingface.co/moondream/parakeet-ultra), a post-training of NVIDIA Parakeet TDT 0.6B v3 by Moondream, converted to Core ML by FluidInference (https://huggingface.co/FluidInference/parakeet-ultra-coreml). Both are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/). The weights are downloaded on demand and not modified by Blitztext.
+
 ## NVIDIA Parakeet TDT 0.6B v3
 
-The local model "Parakeet v3" is NVIDIA Parakeet TDT 0.6B v3 (https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), converted to CoreML by FluidInference (https://huggingface.co/FluidInference/parakeet-tdt-0.6b-v3-coreml). Both are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/). The weights are downloaded on demand and not modified by Blitztext.
+Earlier versions downloaded the local model "Parakeet v3", NVIDIA Parakeet TDT 0.6B v3 (https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), converted to CoreML by FluidInference (https://huggingface.co/FluidInference/parakeet-tdt-0.6b-v3-coreml). Both are licensed under Creative Commons Attribution 4.0 International (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/). The weights are downloaded on demand and not modified by Blitztext.
 
 ## Octicons
 
