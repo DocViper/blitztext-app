@@ -51,23 +51,23 @@ struct PipelineOverviewSection: View {
     private func row(step: String, title: String, model: String, detail: String, ready: Bool) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Text(step)
-                .font(.system(size: 10.5, weight: .bold))
+                .font(.ui(10.5, .bold))
                 .foregroundStyle(BlitztextTheme.accent)
                 .frame(width: 20, height: 20)
                 .background(Circle().fill(BlitztextTheme.accent.opacity(0.12)))
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                 HStack(spacing: 5) {
                     Image(systemName: ready ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .foregroundStyle(ready ? BlitztextTheme.ready : BlitztextTheme.danger)
                     Text(model)
-                        .font(.system(size: 12.5, weight: .semibold))
+                        .font(.ui(12.5, .semibold))
                 }
                 Text(detail)
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }

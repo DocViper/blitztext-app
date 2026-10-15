@@ -42,7 +42,7 @@ struct AppModeRulesSection: View {
     var body: some View {
         SettingsSection(title: "Modus je App") {
             Text("Das Blitztext-K\u{00FC}rzel (\(appState.hotkeyLabel(for: .tapTalk))) kann je App oder Website automatisch einen anderen Modus nutzen, zum Beispiel Blitztext+ in Gmail. \u{00DC}berall sonst bleibt es wortgenau, und die \u{00FC}brigen K\u{00FC}rzel bleiben wie sie sind.")
-                .font(.system(size: 10.5))
+                .font(.ui(12))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -50,7 +50,7 @@ struct AppModeRulesSection: View {
                 HStack(spacing: 8) {
                     appIcon(for: rule.bundleID)
                     Text(rule.appName)
-                        .font(.system(size: 11.5, weight: .medium))
+                        .font(.ui(11.5, .medium))
                         .lineLimit(1)
                     Spacer(minLength: 6)
                     Picker("", selection: binding(for: rule)) {
@@ -67,7 +67,7 @@ struct AppModeRulesSection: View {
                         }
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 8, weight: .bold))
+                            .font(.ui(8, .bold))
                             .foregroundStyle(.tertiary)
                     }
                     .buttonStyle(SubtleButtonStyle())
@@ -78,11 +78,11 @@ struct AppModeRulesSection: View {
             ForEach(websiteRules) { rule in
                 HStack(spacing: 8) {
                     Image(systemName: "globe")
-                        .font(.system(size: 13))
+                        .font(.ui(13))
                         .foregroundStyle(.secondary)
                         .frame(width: 18, height: 18)
                     Text(rule.host)
-                        .font(.system(size: 11.5, weight: .medium))
+                        .font(.ui(11.5, .medium))
                         .lineLimit(1)
                     Spacer(minLength: 6)
                     Picker("", selection: binding(for: rule)) {
@@ -99,7 +99,7 @@ struct AppModeRulesSection: View {
                         }
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 8, weight: .bold))
+                            .font(.ui(8, .bold))
                             .foregroundStyle(.tertiary)
                     }
                     .buttonStyle(SubtleButtonStyle())
@@ -109,7 +109,7 @@ struct AppModeRulesSection: View {
 
             if !websiteRules.isEmpty {
                 Text("Websites erkennt Blitztext in Safari, Chrome, Edge, Brave, Arc und Firefox. Eine Website-Regel gilt vor der Regel f\u{00FC}r den Browser.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -117,7 +117,7 @@ struct AppModeRulesSection: View {
             if (rules.contains(where: { $0.mode != .tapTalk }) || websiteRules.contains(where: { $0.mode != .tapTalk }))
                 && !appState.canRewrite {
                 Text("KI-Modi brauchen Apple Intelligence oder einen API-Key. Bis dahin diktiert Blitztext dort wortgenau.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(BlitztextTheme.danger)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -144,7 +144,7 @@ struct AppModeRulesSection: View {
                 }
             } label: {
                 Label("App oder Website hinzuf\u{00FC}gen", systemImage: "plus")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.ui(11, .medium))
             }
             .menuStyle(.borderlessButton)
             .fixedSize()

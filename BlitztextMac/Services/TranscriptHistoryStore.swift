@@ -104,6 +104,15 @@ final class TranscriptHistoryStore {
     }
 
     private static func load() -> [TranscriptHistoryEntry] {
+        #if DEBUG
+        // Snapshot runs show samples and never open the keychain.
+        if UserDefaults.standard.string(forKey: "BlitztextSnapshotDir") != nil {
+            return [
+                TranscriptHistoryEntry(id: UUID(), createdAt: Date().addingTimeInterval(-600), workflow: .textImprover, text: "Kurze Info f\u{00FC}rs Team: Das Kick-off verschiebt sich auf Donnerstag, 10 Uhr. Agenda und Unterlagen kommen morgen."),
+                TranscriptHistoryEntry(id: UUID(), createdAt: Date().addingTimeInterval(-3600), workflow: .tapTalk, text: "Einkaufsliste f\u{00FC}r das Wochenende: Brot, Tomaten, Kaffee."),
+            ]
+        }
+        #endif
         guard let encrypted = try? Data(contentsOf: AppSupportPaths.historyURL),
               let data = KeychainService.openData(encrypted),
               let entries = try? JSONDecoder().decode([TranscriptHistoryEntry].self, from: data) else {

@@ -12,20 +12,18 @@ struct WorkflowRowView: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(alignment: .center, spacing: 13) {
-                Image(systemName: type.icon)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(Color.primary.opacity(enabled ? 0.82 : 0.35))
-                    .frame(width: 26)
+            HStack(alignment: .center, spacing: 12) {
+                ModeIcon(type: type, size: 34)
+                    .opacity(enabled ? 1 : 0.45)
 
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(customName ?? type.displayName)
-                        .font(.system(size: 13.5, weight: .semibold))
+                        .font(.ui(13.5, .semibold))
                         .foregroundStyle(enabled ? .primary : .tertiary)
                         .lineLimit(1)
 
                     Text(subtitle ?? type.subtitle)
-                        .font(.system(size: 11.5))
+                        .font(.ui(11.5))
                         .foregroundStyle(enabled ? .secondary : .quaternary)
                         .lineLimit(1)
                         .truncationMode(.tail)
@@ -37,9 +35,9 @@ struct WorkflowRowView: View {
                     .opacity(enabled ? 1 : 0.4)
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.vertical, 9)
             .background(
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(isHovered && enabled ? Color.primary.opacity(0.05) : Color.clear)
             )
             .padding(.horizontal, 4)
@@ -47,6 +45,7 @@ struct WorkflowRowView: View {
         }
         .buttonStyle(.plain)
         .disabled(!enabled)
+        .help("Startet \(customName ?? type.displayName)")
         .onHover { hovering in
             withAnimation(.easeOut(duration: 0.12)) {
                 isHovered = hovering
@@ -100,9 +99,7 @@ struct HotkeyBadge: View {
                 : Color.black.opacity(0.035)
         }
 
-        return colorScheme == .dark
-            ? Color.white.opacity(0.12)
-            : Color.black.opacity(0.09)
+        return BlitztextTheme.inset
     }
 
     private var keyStrokeColor: Color {

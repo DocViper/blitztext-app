@@ -23,8 +23,8 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/menu-bar.png" width="400" alt="Blitztext in the menu bar: four modes, each with its own shortcut, everything local">
-  <img src="docs/screenshots/settings-modes.png" width="400" alt="Settings, Modi: the writing modes and a mode per app or website such as Gmail">
+  <img src="docs/screenshots/menu-bar.png" width="400" alt="Blitztext in the menu bar: the speech bubble to dictate, four modes with their shortcuts and the last text as a message">
+  <img src="docs/screenshots/settings-modes.png" width="400" alt="Settings, Modi: writing style, instructions, emoji density and a mode per app or website">
 </p>
 
 Hold a shortcut, speak, let go. Blitztext turns your speech into text and pastes it where your cursor is. Speech recognition runs on your Mac, the writing modes use Apple Intelligence on your Mac. No account, no server, no audio leaving the device.
@@ -39,7 +39,7 @@ Hold a shortcut, speak, let go. Blitztext turns your speech into text and pastes
 ## How It Works
 
 1. **Hold** a shortcut, for example `fn + Shift`.
-2. **Speak** in any language your model knows.
+2. **Speak** in any language your model knows. A small lilac pill at the bottom of the screen shows that Blitztext is listening.
 3. **Let go.** Blitztext transcribes on your Mac with Parakeet or Whisper.
 4. **Done.** The text appears at your cursor, fitted to the text around it. Your clipboard is restored afterwards.
 
@@ -60,6 +60,8 @@ Keyboards without `fn`: set your own shortcut per mode in the settings.
 - **Local writing modes:** Blitztext+, $%&! and :) run with Apple Intelligence on your Mac (macOS 26). Optionally bring your own model provider: OpenAI, Anthropic, Google Gemini, Mistral, OpenRouter, or a local server such as Ollama or LM Studio.
 - **Fits where you type:** spaces and capitals follow the text around your cursor, also mid-sentence. Password fields are never read.
 - **Mode per app or website:** Gmail always Blitztext+, Slack with emojis, everything else word for word.
+- **See that it listens:** a small lilac pill at the bottom of the screen moves with your voice while Blitztext records. Click it to stop. It never takes the focus, so the text still lands where you type. You can turn it off in the settings.
+- **Last text at hand:** the menu bar window shows your last text as a message. One click copies it.
 - **Sound off while recording:** a podcast or music is muted while you speak and back right after.
 - **Voice memos and WhatsApp voice messages:** drop an audio file on Blitztext and get the text, optionally with paragraphs.
 - **Dictionary:** names and terms spelled your way, fixed replacements ("n acht n" becomes "n8n").
@@ -70,8 +72,8 @@ Keyboards without `fn`: set your own shortcut per mode in the settings.
 
 | | |
 |---|---|
-| <img src="docs/screenshots/settings-models.png" width="400" alt="Settings, Modelle: local speech recognition and the AI modes"> | <img src="docs/screenshots/settings-general.png" width="400" alt="Settings, Allgemein: how Blitztext works, shortcuts, sound off while recording"> |
-| Speech recognition and AI modes on your Mac | How Blitztext works, shortcuts, sound off while recording |
+| <img src="docs/screenshots/settings-models.png" width="400" alt="Settings, Modelle: local speech recognition with Parakeet Ultra and the AI modes with Apple Intelligence"> | <img src="docs/screenshots/settings-general.png" width="400" alt="Settings, Allgemein: how Blitztext works, shortcuts, hold or press, and the recording pill"> |
+| Speech recognition and AI modes on your Mac | How Blitztext works, shortcuts and the lilac pill while you speak |
 
 The app is in German for now.
 
@@ -122,7 +124,7 @@ cd blitztext-app
 ```text
 BlitztextMac/        macOS menu bar app (SwiftUI, AppKit)
   App/               app state and lifecycle
-  Features/          workflows, menu bar, settings, audio files, release notes
+  Features/          workflows, menu bar, settings, audio files, release notes, recording pill
   Services/          recording, hotkeys, local transcription, paste, history, updates
   Views/             shared UI pieces
   Tests/             unit tests: post-processing, cursor fit, paragraphs, filters
@@ -130,7 +132,7 @@ BlitztextShared/     code shared with the (not yet public) iOS app
   AI/                model providers, Apple Intelligence rewriting, mode prompts
   Audio/             audio file conversion
   Transcription/     Whisper call and filter for invented text
-  Design/            design tokens, Public Sans
+  Design/            design tokens, Public Sans, shapes (speech bubble, message, Blackboat mark)
   Licenses/          bundled third-party licenses
 build.sh             local build script
 ```

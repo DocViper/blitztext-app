@@ -17,7 +17,7 @@ struct MacAIProviderSection: View {
     var body: some View {
         SettingsSection(title: "Modell-Anbieter") {
             Text("Optional. Mit Apple Intelligence laufen die KI-Modi auf diesem Mac. Ein eigener API-Key hilft, wenn Apple Intelligence fehlt oder mehr Qualität gefragt ist.")
-                .font(.system(size: 10.5))
+                .font(.ui(12))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -42,7 +42,7 @@ struct MacAIProviderSection: View {
         HStack(spacing: 8) {
             SecureField(maskedKey(provider) ?? (provider.requiresAPIKey ? "API-Key einfügen" : "API-Key (optional)"), text: $keyInput)
                 .textFieldStyle(.roundedBorder)
-                .font(.system(size: 11.5))
+                .font(.ui(11.5))
             Button("Sichern") { saveKey(provider) }
                 .buttonStyle(SubtleButtonStyle())
                 .disabled(keyInput.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -65,28 +65,28 @@ struct MacAIProviderSection: View {
                 Link("Key erstellen", destination: url)
             }
         }
-        .font(.system(size: 10.5, weight: .medium))
+        .font(.ui(10.5, .medium))
 
         HStack(spacing: 8) {
             Text("Modell")
-                .font(.system(size: 11))
+                .font(.ui(12))
                 .foregroundStyle(.secondary)
             TextField(provider.defaultModel, text: modelBinding)
                 .textFieldStyle(.roundedBorder)
-                .font(.system(size: 11.5))
+                .font(.ui(11.5))
         }
 
         if provider == .custom {
             HStack(spacing: 8) {
                 Text("Adresse")
-                    .font(.system(size: 11))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                 TextField(provider.defaultBaseURL, text: baseURLBinding)
                     .textFieldStyle(.roundedBorder)
-                    .font(.system(size: 11.5))
+                    .font(.ui(11.5))
             }
             Text("OpenAI-kompatible Adresse, zum Beispiel Ollama oder LM Studio auf diesem Mac.")
-                .font(.system(size: 10.5))
+                .font(.ui(12))
                 .foregroundStyle(.secondary)
         }
 
@@ -101,11 +101,11 @@ struct MacAIProviderSection: View {
             case .failed: Image(systemName: "xmark.octagon.fill").foregroundStyle(BlitztextTheme.danger)
             }
         }
-        .font(.system(size: 10.5, weight: .medium))
+        .font(.ui(10.5, .medium))
 
         if case .failed(let message) = testState {
             Text(message)
-                .font(.system(size: 10.5))
+                .font(.ui(12))
                 .foregroundStyle(BlitztextTheme.danger)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -117,7 +117,7 @@ struct MacAIProviderSection: View {
             Image(systemName: "arrow.up.forward.circle.fill")
                 .foregroundStyle(BlitztextTheme.accent)
         }
-        .font(.system(size: 10.5))
+        .font(.ui(12))
         .foregroundStyle(.secondary)
     }
 

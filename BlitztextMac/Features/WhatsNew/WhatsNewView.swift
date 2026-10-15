@@ -4,7 +4,7 @@ import SwiftUI
 /// or right after the first dictation for people who only use the shortcuts.
 enum WhatsNew {
     /// Bump together with the items when a release deserves a note.
-    static let version = "1.12"
+    static let version = "1.13"
 
     struct Item: Identifiable {
         let icon: String
@@ -15,19 +15,14 @@ enum WhatsNew {
 
     static let items: [Item] = [
         Item(
+            icon: "bubble.left.fill",
+            title: "Neues Aussehen",
+            detail: "Blitztext sieht jetzt aus wie auf dem iPhone: klare Karten, Blackboat-Farben und die Sprechblase. Die Modi zeigen ihre Farbe, dein letzter Text steht als Nachricht bereit und ist mit einem Klick kopiert."
+        ),
+        Item(
             icon: "waveform",
-            title: "Genauer auf Deutsch",
-            detail: "Parakeet Ultra macht auf Deutsch rund ein Sechstel weniger Fehler und ist genauso schnell. Wer Parakeet schon hat, bekommt Ultra von selbst im Hintergrund."
-        ),
-        Item(
-            icon: "doc.on.clipboard",
-            title: "Zwischenablage zuverlässiger",
-            detail: "Blitztext wartet, bis die App den Text wirklich eingefügt hat, und gibt dir dann deine Zwischenablage zurück. Was du zwischendurch kopierst, bleibt."
-        ),
-        Item(
-            icon: "character.book.closed",
-            title: "Wörterbuch genauer",
-            detail: "Namen aus deinem Wörterbuch werden auch erkannt, wenn sie anders klingen. Echte Wörter wie „Cloud“ bleiben stehen, Zeilenumbrüche auch."
+            title: "Aufnahme sichtbar",
+            detail: "Unten am Bildschirm zeigt eine kleine lila Anzeige, dass Blitztext zuh\u{00F6}rt. Sie bewegt sich mit deiner Stimme, ein Klick stoppt die Aufnahme. Abschalten kannst du sie unter Einstellungen, Allgemein."
         ),
     ]
 }
@@ -45,7 +40,7 @@ struct WhatsNewView: View {
                 Text("Neu in Blitztext \(WhatsNew.version)")
                     .font(BlackboatType.publicSans(20, .bold, relativeTo: .title3))
                 Text("Einmal kurz, dann geht es weiter wie gewohnt.")
-                    .font(.system(size: 12))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -59,14 +54,14 @@ struct WhatsNewView: View {
                 ForEach(WhatsNew.items) { item in
                     HStack(alignment: .top, spacing: 12) {
                         Image(systemName: item.icon)
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.ui(14, .semibold))
                             .foregroundStyle(BlitztextTheme.accent)
                             .frame(width: 22)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(item.title)
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.ui(13, .semibold))
                             Text(item.detail)
-                                .font(.system(size: 11.5))
+                                .font(.ui(11.5))
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -99,7 +94,7 @@ struct WhatsNewView: View {
                         appState.page = .settings
                     } label: {
                         Text("Einrichten")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.ui(12, .medium))
                     }
                     .buttonStyle(.glassAction)
                 }
@@ -108,7 +103,7 @@ struct WhatsNewView: View {
                     appState.page = .main
                 } label: {
                     Text("Verstanden")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.ui(12, .semibold))
                 }
                 .buttonStyle(.glassAction)
                 .keyboardShortcut(.defaultAction)

@@ -84,7 +84,13 @@ enum BlitztextInstallLocationService {
     }()
 
     static var shouldOfferMoveToApplications: Bool {
-        !currentInstallLocation.isCanonicalInstall && !isManagedByJamf
+        !currentInstallLocation.isCanonicalInstall && !isManagedByJamf && !isPreviewBuild
+    }
+
+    /// A design preview built next to the installed app (bundle ID `….preview`): it
+    /// lives outside /Applications on purpose.
+    static var isPreviewBuild: Bool {
+        Bundle.main.bundleIdentifier?.hasSuffix(".preview") == true
     }
 
     static var systemApplicationsDirectoryURL: URL {

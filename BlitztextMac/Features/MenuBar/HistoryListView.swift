@@ -50,7 +50,7 @@ struct HistoryListView: View {
 
                 HStack {
                     Text("Nur auf diesem Mac, \(retentionHint).")
-                        .font(.system(size: 10))
+                        .font(.ui(10.5))
                         .foregroundStyle(.tertiary)
                     Spacer()
                     Button("Alles l\u{00F6}schen") {
@@ -58,7 +58,7 @@ struct HistoryListView: View {
                             appState.history.clear()
                         }
                     }
-                    .font(.system(size: 10.5, weight: .medium))
+                    .font(.ui(10.5, .medium))
                     .foregroundStyle(.secondary)
                     .buttonStyle(SubtleButtonStyle())
                 }
@@ -79,12 +79,12 @@ struct HistoryListView: View {
     private func emptyState(icon: String, title: String, detail: String) -> some View {
         VStack(spacing: 8) {
             Image(systemName: icon)
-                .font(.system(size: 22, weight: .light))
+                .font(.ui(22, .light))
                 .foregroundStyle(.tertiary)
             Text(title)
-                .font(.system(size: 12.5, weight: .medium))
+                .font(.ui(12.5, .medium))
             Text(detail)
-                .font(.system(size: 11))
+                .font(.ui(11))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -110,17 +110,17 @@ private struct HistoryRow: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 5) {
                 Image(systemName: entry.workflow.icon)
-                    .font(.system(size: 9.5, weight: .semibold))
+                    .font(.ui(9.5, .semibold))
                 Text(workflowName)
-                    .font(.system(size: 10.5, weight: .medium))
+                    .font(.ui(10.5, .medium))
                 Text(timestamp)
-                    .font(.system(size: 10.5))
+                    .font(.ui(11))
                     .foregroundStyle(.tertiary)
                 Spacer()
                 if isHovered {
                     Button(action: onDelete) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 8, weight: .bold))
+                            .font(.ui(8, .bold))
                             .foregroundStyle(.tertiary)
                     }
                     .buttonStyle(SubtleButtonStyle())
@@ -130,7 +130,7 @@ private struct HistoryRow: View {
             .foregroundStyle(.secondary)
 
             Text(entry.text)
-                .font(.system(size: 11.5))
+                .font(.ui(11.5))
                 .lineLimit(3)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .textSelection(.enabled)
@@ -148,7 +148,7 @@ private struct HistoryRow: View {
                 }
                 Spacer()
             }
-            .font(.system(size: 10.5, weight: .medium))
+            .font(.ui(10.5, .medium))
             .foregroundStyle(BlitztextTheme.accent)
             .buttonStyle(SubtleButtonStyle())
         }

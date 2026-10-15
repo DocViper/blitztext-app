@@ -18,11 +18,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var popover: NSPopover!
     private let menuBarStatusController = MenuBarStatusController()
     let appState = AppState()
+    private lazy var recordingIndicator = RecordingIndicatorController(appState: appState)
     /// Files opened before launch finished (e.g. "Open With" on a closed app).
     private var pendingAudioFile: URL?
     private var didFinishLaunching = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        #if DEBUG
+        if let folder = MacSnapshots.folder {
+            NSApp.setActivationPolicy(.prohibited)
+            MacSnapshots.render(appState: appState, to: folder)
+            NSApp.terminate(nil)
+            return
+        }
+        #endif
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
         if let button = statusItem.button {
@@ -48,6 +57,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
         appState.onMenuBarStatusChange = { [weak self] status in
             self?.menuBarStatusController.update(to: status)
+            self?.recordingIndicator.update(to: status)
+        }
+        appState.onRecordingIndicatorSettingChange = { [weak self] in
+            self?.recordingIndicator.settingChanged()
         }
         appState.onWhatsNewChange = { [weak self] unseen in
             self?.menuBarStatusController.showsNewBadge = unseen
@@ -273,3 +286,68 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
     }
 }
+
+#if DEBUG
+/// Design reviews: `-BlitztextSnapshotDir /path` renders the popover pages, the settings
+/// panes and the recording pill to PNG files, light and dark, and quits. No status item,
+/// no hotkeys, nothing is recorded. Not compiled into Release builds.
+@MainActor
+enum MacSnapshots {
+    static var folder: URL? {
+        UserDefaults.standard.string(forKey: "BlitztextSnapshotDir").map { URL(fileURLWithPath: $0) }
+    }
+
+    static func render(appState: AppState, to folder: URL) {
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        // As on a set-up Mac: the unsigned snapshot binary has no Accessibility grant.
+        appState.accessibilityPermissionGranted = true
+        for (mode, name) in [("light", NSAppearance.Name.aqua), ("dark", NSAppearance.Name.darkAqua)] {
+            let appearance = NSAppearance(named: name)
+            NSApp.appearance = appearance
+
+            for (page, label) in [(PopoverPage.main, "main"), (.onboarding, "onboarding"), (.history, "history")] {
+                appState.page = page
+                capture(MenuBarView(appState: appState), appearance: appearance, to: folder.appendingPathComponent("\(mode)-\(label).png"))
+            }
+            for pane in SettingsPane.allCases {
+                SettingsContentView.debugInitialPane = pane
+                appState.page = .settings
+                capture(MenuBarView(appState: appState), appearance: appearance, to: folder.appendingPathComponent("\(mode)-popover-settings-\(pane.rawValue).png"))
+                let view = SettingsContentView(appState: appState)
+                    .frame(width: MenuBarView.width, height: 1400, alignment: .top)
+                    .background(BlitztextTheme.page)
+                capture(view, appearance: appearance, to: folder.appendingPathComponent("\(mode)-settings-\(pane.rawValue).png"))
+            }
+            for (status, label) in [(MenuBarStatus.recording(.tapTalk), "recording"), (.processing(.tapTalk), "processing"), (.success(.tapTalk), "success")] {
+                let model = RecordingIndicatorModel()
+                model.status = status
+                let pill = RecordingPill(model: model, appState: appState) {}
+                    .frame(width: RecordingPill.panelSize.width, height: RecordingPill.panelSize.height)
+                    .padding(20)
+                    .background(BlitztextTheme.page)
+                capture(pill, appearance: appearance, to: folder.appendingPathComponent("\(mode)-pill-\(label).png"))
+            }
+        }
+        appState.page = .main
+    }
+
+    private static func capture<V: View>(_ view: V, appearance: NSAppearance?, to url: URL) {
+        let hosting = NSHostingView(rootView: view)
+        hosting.appearance = appearance
+        let size = hosting.fittingSize
+        hosting.frame = NSRect(origin: .zero, size: size)
+        let window = NSWindow(contentRect: hosting.frame, styleMask: .borderless, backing: .buffered, defer: false)
+        window.appearance = appearance
+        window.contentView = hosting
+        hosting.layoutSubtreeIfNeeded()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.4))
+        if let bitmap = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) {
+            hosting.cacheDisplay(in: hosting.bounds, to: bitmap)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: url)
+        }
+        window.isReleasedWhenClosed = false
+        window.contentView = nil
+        window.close()
+    }
+}
+#endif

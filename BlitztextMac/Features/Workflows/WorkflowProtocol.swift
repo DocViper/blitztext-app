@@ -106,6 +106,8 @@ protocol Workflow: AnyObject, Observable {
     var type: WorkflowType { get }
     var phase: WorkflowPhase { get set }
     var isRecording: Bool { get }
+    /// Input level 0...1 while recording, for the waveforms.
+    var audioLevel: Float { get }
     var onOutput: WorkflowOutputHandler? { get set }
     var onPhaseChange: WorkflowPhaseChangeHandler? { get set }
 
@@ -143,6 +145,8 @@ struct AppSettings: Codable {
     var muteOutputWhileRecording: Bool = true
     /// Long word-for-word dictation gets paragraph breaks at sentence ends.
     var automaticParagraphs: Bool = false
+    /// A small lilac pill at the bottom of the screen while recording and processing.
+    var showsRecordingIndicator: Bool = true
 
     init(
         hotkeyMode: HotkeyMode = .hold,
@@ -174,6 +178,7 @@ struct AppSettings: Codable {
         case aiSeesFieldContext
         case muteOutputWhileRecording
         case automaticParagraphs
+        case showsRecordingIndicator
     }
 
     init(from decoder: Decoder) throws {
@@ -201,6 +206,7 @@ struct AppSettings: Codable {
         aiSeesFieldContext = try container.decodeIfPresent(Bool.self, forKey: .aiSeesFieldContext) ?? false
         muteOutputWhileRecording = try container.decodeIfPresent(Bool.self, forKey: .muteOutputWhileRecording) ?? true
         automaticParagraphs = try container.decodeIfPresent(Bool.self, forKey: .automaticParagraphs) ?? false
+        showsRecordingIndicator = try container.decodeIfPresent(Bool.self, forKey: .showsRecordingIndicator) ?? true
     }
 
     func customHotkey(for type: WorkflowType) -> KeyCombo? {

@@ -26,7 +26,7 @@ struct AudioFileView: View {
                         HStack(spacing: 10) {
                             ProgressView().controlSize(.small)
                             Text(message)
-                                .font(.system(size: 12.5))
+                                .font(.ui(12.5))
                                 .foregroundStyle(.secondary)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -34,7 +34,7 @@ struct AudioFileView: View {
                         .glassPanel()
                     case .failed(let message):
                         Label(message, systemImage: "exclamationmark.triangle.fill")
-                            .font(.system(size: 12.5))
+                            .font(.ui(12.5))
                             .foregroundStyle(BlitztextTheme.danger)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(14)
@@ -44,7 +44,7 @@ struct AudioFileView: View {
                     }
 
                     Text("Die Datei wird auf diesem Mac transkribiert und nicht ver\u{00E4}ndert.")
-                        .font(.system(size: 10.5))
+                        .font(.ui(11))
                         .foregroundStyle(.tertiary)
                 }
                 .padding(16)
@@ -58,7 +58,7 @@ struct AudioFileView: View {
                     NotificationCenter.default.post(name: .chooseAudioFile, object: nil)
                 } label: {
                     Label("Andere Datei ...", systemImage: "folder")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.ui(12, .medium))
                 }
                 .buttonStyle(.glassAction)
                 .disabled(controller.isWorking)
@@ -72,16 +72,16 @@ struct AudioFileView: View {
     private var fileRow: some View {
         HStack(spacing: 10) {
             Image(systemName: "waveform")
-                .font(.system(size: 15, weight: .semibold))
+                .font(.ui(15, .semibold))
                 .foregroundStyle(BlitztextTheme.accent)
             VStack(alignment: .leading, spacing: 1) {
                 Text(controller.fileName)
-                    .font(.system(size: 12.5, weight: .semibold))
+                    .font(.ui(12.5, .semibold))
                     .lineLimit(1)
                     .truncationMode(.middle)
                 if controller.duration > 0 {
                     Text(durationText)
-                        .font(.system(size: 11))
+                        .font(.ui(11))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -108,11 +108,11 @@ struct AudioFileView: View {
                     }
                 }
             }
-            .font(.system(size: 11, weight: .semibold))
+            .font(.ui(11, .semibold))
             .foregroundStyle(.secondary)
 
             Text(controller.text)
-                .font(.system(size: 13))
+                .font(.ui(13))
                 .textSelection(.enabled)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -121,7 +121,7 @@ struct AudioFileView: View {
                     controller.copy(appState: appState)
                 } label: {
                     Label("Kopieren", systemImage: "doc.on.doc")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.ui(12, .medium))
                 }
                 .buttonStyle(.glassAction)
 
@@ -140,7 +140,7 @@ struct AudioFileView: View {
                         }
                     } label: {
                         Label("Umschreiben als ...", systemImage: "wand.and.stars")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.ui(12, .medium))
                     }
                     .menuStyle(.borderlessButton)
                     .fixedSize()

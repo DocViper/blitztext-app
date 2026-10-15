@@ -1,18 +1,54 @@
 import SwiftUI
 import AppKit
 
-// Visual language shared with _Space, Blackboat's design language:
-// glass surfaces, calm monochrome type, colour only where it carries meaning.
+// The Blitztext look of the iOS app on the Mac: Blackboat surfaces (a quiet page, white
+// cards by day, night surfaces in dark mode), Public Sans, the accent only for actions
+// and selection. Structure follows Material 3 like on iOS.
 
 enum BlitztextTheme {
     /// Blackboat tokens shared with iOS (BlitztextShared/Design): day in light, night in dark.
     static let accent = BlackboatColor.accent
+    /// Text and icons on a filled accent: white by day, the night contrast ink on lilac.
+    static let onAccent = BlackboatColor.dynamic(light: 0xFFFFFF, dark: 0x0F1116)
 
     static let ready = BlackboatColor.successForeground
     static let danger = BlackboatColor.error
 
+    /// Page behind the cards: surface hover by day, surface base at night.
+    static let page = BlackboatColor.dynamic(light: 0xF5F5F5, dark: 0x050722)
+    /// Cards and grouped rows: surface elevated.
+    static let card = BlackboatColor.surfaceElevated
+    /// Fills inside a card: fields, tracks.
+    static let inset = BlackboatColor.dynamic(light: 0xF5F5F5, dark: 0x191B46)
+    /// Selected and tonal elements: the tertiary accent at low strength.
+    static let tonal = BlackboatColor.dynamic(light: 0x70A5FF, dark: 0xBB84DF).opacity(0.26)
+    static let onTonal = BlackboatColor.dynamic(light: 0x0B0EC1, dark: 0xFFFFFF)
+    /// The lilac of Blackboat's night accents, for the recording indicator.
+    static let lilac = BlackboatColor.dynamic(light: 0x8337A8, dark: 0xBB84DF)
+
+    static let cardShadow = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? .clear : NSColor(srgbRed: 0.05, green: 0.07, blue: 0.11, alpha: 0.07)
+    })
+    static let cardEdge = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(white: 1, alpha: 0.07) : .clear
+    })
+
     static let subtleFill = Color.primary.opacity(0.04)
     static let subtleStroke = Color.primary.opacity(0.08)
+}
+
+extension Font {
+    /// Public Sans at a fixed size (the Mac has no Dynamic Type). Medium maps to
+    /// SemiBold, the closest weight the app bundles.
+    static func ui(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
+        let face: BlackboatType.Weight
+        switch weight {
+        case .bold, .heavy, .black: face = .bold
+        case .semibold, .medium: face = .semibold
+        default: face = .regular
+        }
+        return .custom(face.rawValue, fixedSize: size)
+    }
 }
 
 // MARK: - Surfaces
@@ -21,65 +57,39 @@ enum BlitztextSurface {
     @ViewBuilder
     static var windowBackground: some View {
         Rectangle()
-            .fill(.ultraThinMaterial)
-        Rectangle()
-            .fill(
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(0.18),
-                        Color(nsColor: .controlBackgroundColor).opacity(0.06),
-                        Color.primary.opacity(0.025)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
+            .fill(BlitztextTheme.page)
     }
 
     static var border: Color {
-        Color.primary.opacity(0.10)
+        BlitztextTheme.subtleStroke
     }
 }
 
-private struct GlassPanelModifier: ViewModifier {
+private struct CardModifier: ViewModifier {
     let cornerRadius: CGFloat
-    let tintOpacity: Double
-    let shadowOpacity: Double
 
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-
         content
             .background {
-                shape.fill(.ultraThinMaterial)
-                shape.fill(Color(nsColor: .controlBackgroundColor).opacity(tintOpacity))
+                shape
+                    .fill(BlitztextTheme.card)
+                    .shadow(color: BlitztextTheme.cardShadow, radius: 3, x: 0, y: 1)
             }
             .overlay {
-                shape.strokeBorder(BlitztextSurface.border, lineWidth: 1)
+                shape.strokeBorder(BlitztextTheme.cardEdge, lineWidth: 1)
             }
-            .overlay(alignment: .top) {
-                shape
-                    .strokeBorder(Color.white.opacity(0.24), lineWidth: 0.7)
-                    .blendMode(.plusLighter)
-            }
-            .shadow(color: Color.black.opacity(shadowOpacity), radius: 16, x: 0, y: 5)
             .clipShape(shape)
     }
 }
 
-private struct GlassCapsuleModifier: ViewModifier {
+private struct TonalCapsuleModifier: ViewModifier {
     let tint: Color
     let fillOpacity: Double
 
     func body(content: Content) -> some View {
         content
-            .background {
-                Capsule().fill(.ultraThinMaterial)
-                Capsule().fill(tint.opacity(fillOpacity))
-            }
-            .overlay {
-                Capsule().strokeBorder(tint.opacity(0.18), lineWidth: 1)
-            }
+            .background(Capsule().fill(tint.opacity(min(fillOpacity * 1.6, 1))))
             .clipShape(Capsule())
     }
 }
@@ -89,24 +99,19 @@ private struct SettingsCardModifier: ViewModifier {
         content
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color.primary.opacity(0.03))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.05), lineWidth: 1)
-            )
+            .modifier(CardModifier(cornerRadius: 14))
     }
 }
 
 extension View {
-    func glassPanel(cornerRadius: CGFloat = 12, tintOpacity: Double = 0.075, shadowOpacity: Double = 0.045) -> some View {
-        modifier(GlassPanelModifier(cornerRadius: cornerRadius, tintOpacity: tintOpacity, shadowOpacity: shadowOpacity))
+    /// A card on the page. The name stays from the glass days; the parameters beyond the
+    /// radius are no longer used.
+    func glassPanel(cornerRadius: CGFloat = 14, tintOpacity: Double = 0, shadowOpacity: Double = 0) -> some View {
+        modifier(CardModifier(cornerRadius: max(cornerRadius, 12)))
     }
 
     func glassCapsule(tint: Color, fillOpacity: Double = 0.11) -> some View {
-        modifier(GlassCapsuleModifier(tint: tint, fillOpacity: fillOpacity))
+        modifier(TonalCapsuleModifier(tint: tint, fillOpacity: fillOpacity))
     }
 
     func settingsCard() -> some View {
@@ -116,15 +121,16 @@ extension View {
 
 // MARK: - Building Blocks
 
-/// Uppercase section title above a card, as in _Space settings.
+/// Section title above a card: neutral, so the accent stays with actions.
 struct SectionHeader: View {
     let title: String
 
     var body: some View {
-        Text(title.uppercased())
-            .font(.system(size: 10, weight: .semibold))
-            .tracking(0.5)
-            .foregroundStyle(.tertiary)
+        Text(title)
+            .font(.ui(12, .semibold))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 2)
+            .accessibilityAddTraits(.isHeader)
     }
 }
 
@@ -136,7 +142,7 @@ struct SettingsSection<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             SectionHeader(title: title)
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 12) {
                 content
             }
             .settingsCard()
@@ -149,14 +155,33 @@ struct TrailingSwitchToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(alignment: .center, spacing: 10) {
             configuration.label
-                .font(.system(size: 11.5))
+                .font(.ui(12.5))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
-            Toggle("", isOn: configuration.$isOn)
-                .labelsHidden()
-                .toggleStyle(.switch)
-                .controlSize(.small)
+            #if DEBUG
+            if MacSnapshots.folder != nil {
+                // Offscreen captures draw AppKit switches as off; draw the state instead.
+                Capsule()
+                    .fill(configuration.isOn ? BlitztextTheme.accent : BlitztextTheme.inset)
+                    .overlay(alignment: configuration.isOn ? .trailing : .leading) {
+                        Circle().fill(.white).shadow(color: .black.opacity(0.15), radius: 1, y: 0.5).padding(2)
+                    }
+                    .frame(width: 32, height: 18)
+            } else {
+                nativeSwitch(configuration)
+            }
+            #else
+            nativeSwitch(configuration)
+            #endif
         }
+    }
+
+    private func nativeSwitch(_ configuration: Configuration) -> some View {
+        Toggle("", isOn: configuration.$isOn)
+            .labelsHidden()
+            .toggleStyle(.switch)
+            .controlSize(.small)
+            .tint(BlitztextTheme.accent)
     }
 }
 
@@ -174,11 +199,11 @@ struct SettingsRow<Control: View>: View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 12.5, weight: .semibold))
+                    .font(.ui(13))
                 if let subtitle {
                     Text(subtitle)
-                        .font(.system(size: 10.5))
-                        .foregroundStyle(.tertiary)
+                        .font(.ui(11))
+                        .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -198,15 +223,15 @@ struct StatusCapsule: View {
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 11.5, weight: .semibold))
-                .foregroundStyle(tint.opacity(0.95))
+                .font(.ui(11, .semibold))
+                .foregroundStyle(tint)
             Text(title)
-                .font(.system(size: 12.5, weight: .semibold))
-                .foregroundStyle(Color.primary.opacity(0.84))
+                .font(.ui(12, .semibold))
+                .foregroundStyle(.primary)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .glassCapsule(tint: tint, fillOpacity: fillOpacity)
+        .background(Capsule().fill(BlitztextTheme.tonal))
     }
 }
 
@@ -220,20 +245,20 @@ struct NoticeRow: View {
     var action: (() -> Void)?
 
     var body: some View {
-        HStack(alignment: .top, spacing: 9) {
+        HStack(alignment: .top, spacing: 10) {
             Image(systemName: icon)
-                .font(.system(size: 11, weight: .semibold))
+                .font(.ui(12, .semibold))
                 .foregroundStyle(tint)
-                .frame(width: 14)
+                .frame(width: 16)
                 .padding(.top, 1)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 11.5, weight: .semibold))
+                    .font(.ui(12, .semibold))
                     .foregroundStyle(.primary)
                 if let detail {
                     Text(detail)
-                        .font(.system(size: 10.5))
+                        .font(.ui(11))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -243,25 +268,17 @@ struct NoticeRow: View {
 
             if let actionTitle, let action {
                 Button(actionTitle, action: action)
-                    .font(.system(size: 11, weight: .medium))
-                    .buttonStyle(.subtle)
+                    .buttonStyle(.glassAction)
             }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background {
-            RoundedRectangle(cornerRadius: 8, style: .continuous).fill(.ultraThinMaterial)
-            RoundedRectangle(cornerRadius: 8, style: .continuous).fill(tint.opacity(0.05))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(tint.opacity(0.12), lineWidth: 1)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(tint.opacity(0.10)))
     }
 }
 
-/// Header for sub pages: back button, centered title, optional trailing view.
+/// Header for sub pages: round back button, centered title, optional trailing view.
 struct PageHeader<Trailing: View>: View {
     let title: String
     let onBack: () -> Void
@@ -270,20 +287,21 @@ struct PageHeader<Trailing: View>: View {
     var body: some View {
         ZStack {
             Text(title)
-                .font(.system(size: 13, weight: .semibold))
+                .font(.ui(14, .semibold))
 
             HStack {
                 Button(action: onBack) {
-                    HStack(spacing: 3) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 11, weight: .semibold))
-                        Text("Zur\u{00FC}ck")
-                            .font(.system(size: 12))
-                    }
-                    .foregroundStyle(.secondary)
-                    .contentShape(Rectangle())
+                    Image(systemName: "chevron.left")
+                        .font(.ui(12, .semibold))
+                        .foregroundStyle(.primary)
+                        .frame(width: 28, height: 28)
+                        .background(Circle().fill(BlitztextTheme.card))
+                        .shadow(color: BlitztextTheme.cardShadow, radius: 2, y: 1)
+                        .contentShape(Circle())
                 }
-                .buttonStyle(.subtle)
+                .buttonStyle(.plain)
+                .help("Zur\u{00FC}ck")
+                .accessibilityLabel("Zur\u{00FC}ck")
 
                 Spacer()
 
@@ -302,6 +320,52 @@ extension PageHeader where Trailing == EmptyView {
     }
 }
 
+extension WorkflowType {
+    /// Accent family from the Blackboat tokens, as on iOS: day for plain dictation,
+    /// evening for the writing modes, night for Dampf ablassen.
+    var tint: Color {
+        switch self {
+        case .tapTalk, .localTapTalk: return BlackboatColor.Source.day.primary
+        case .dampfAblassen: return BlackboatColor.Source.night.primary
+        case .textImprover, .emojiText: return BlackboatColor.Source.evening.primary
+        }
+    }
+}
+
+/// The mode's symbol in a circle of its colour, as on iOS.
+struct ModeIcon: View {
+    let type: WorkflowType
+    var size: CGFloat = 32
+
+    var body: some View {
+        Image(systemName: type.icon)
+            .font(.ui(size * 0.42, .semibold))
+            .foregroundStyle(type.tint)
+            .frame(width: size, height: size)
+            .background(Circle().fill(type.tint.opacity(0.14)))
+            .accessibilityHidden(true)
+    }
+}
+
+/// "Blitztext by Blackboat" with the mark.
+struct BrandRow: View {
+    var body: some View {
+        HStack(spacing: 9) {
+            BlackboatMark()
+                .fill(Color.primary)
+                .frame(width: 24, height: 24)
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Blitztext")
+                    .font(.ui(15, .bold))
+                Text("by Blackboat")
+                    .font(.ui(11))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
 // MARK: - Buttons
 
 /// No fill except on hover, soft press effect.
@@ -316,11 +380,11 @@ struct SubtleButtonStyle: ButtonStyle {
 
         var body: some View {
             configuration.label
-                .padding(.horizontal, 6)
-                .padding(.vertical, 3)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
                 .background {
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(Color.primary.opacity(isHovered ? 0.06 : 0))
+                    Capsule()
+                        .fill(Color.primary.opacity(isHovered ? 0.07 : 0))
                 }
                 .opacity(configuration.isPressed ? 0.6 : 1.0)
                 .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
@@ -335,36 +399,42 @@ extension ButtonStyle where Self == SubtleButtonStyle {
     static var subtle: SubtleButtonStyle { SubtleButtonStyle() }
 }
 
-/// Glass button for the footer bar and primary actions.
+/// Tonal capsule (M3 tonal button) for secondary actions.
 struct GlassActionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        GlassActionBody(configuration: configuration)
+        TonalBody(configuration: configuration, filled: false)
     }
+}
 
-    private struct GlassActionBody: View {
-        let configuration: Configuration
-        @State private var isHovered = false
+/// Filled capsule in the accent for the one main action of a view.
+struct FilledActionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        TonalBody(configuration: configuration, filled: true)
+    }
+}
 
-        var body: some View {
-            configuration.label
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .background {
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .fill(Color(nsColor: .controlBackgroundColor).opacity(isHovered ? 0.22 : 0.08))
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .strokeBorder(Color.primary.opacity(isHovered ? 0.18 : 0.095), lineWidth: 1)
-                }
-                .opacity(configuration.isPressed ? 0.72 : 1)
-                .scaleEffect(configuration.isPressed ? 0.98 : 1)
-                .animation(.easeOut(duration: 0.12), value: isHovered)
-                .animation(.easeOut(duration: 0.10), value: configuration.isPressed)
-                .onHover { isHovered = $0 }
-        }
+private struct TonalBody: View {
+    let configuration: ButtonStyleConfiguration
+    let filled: Bool
+    @State private var isHovered = false
+    @Environment(\.isEnabled) private var isEnabled
+
+    var body: some View {
+        configuration.label
+            .font(.ui(12, .semibold))
+            .foregroundStyle(filled ? BlitztextTheme.onAccent : BlitztextTheme.onTonal)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .background {
+                RoundedRectangle(cornerRadius: configuration.isPressed ? 10 : 100, style: .continuous)
+                    .fill(filled ? BlitztextTheme.accent : BlitztextTheme.tonal)
+                RoundedRectangle(cornerRadius: configuration.isPressed ? 10 : 100, style: .continuous)
+                    .fill(Color.primary.opacity(isHovered ? 0.06 : 0))
+            }
+            .opacity(isEnabled ? 1 : 0.45)
+            .animation(.spring(response: 0.3, dampingFraction: 0.75), value: configuration.isPressed)
+            .animation(.easeOut(duration: 0.12), value: isHovered)
+            .onHover { isHovered = $0 }
     }
 }
 
@@ -372,42 +442,51 @@ extension ButtonStyle where Self == GlassActionButtonStyle {
     static var glassAction: GlassActionButtonStyle { GlassActionButtonStyle() }
 }
 
+extension ButtonStyle where Self == FilledActionButtonStyle {
+    static var filledAction: FilledActionButtonStyle { FilledActionButtonStyle() }
+}
+
 // MARK: - Controls
 
-/// Monochrome alternative to `Picker(.segmented)`, same as in _Space.
+/// M3 segmented buttons: outlined capsule, the selected segment tonal with a check.
 struct SegmentedToggle<Option: Hashable & Identifiable>: View {
     let options: [Option]
     @Binding var selection: Option
     let label: (Option) -> String
 
     var body: some View {
-        HStack(spacing: 4) {
-            ForEach(options) { option in
+        HStack(spacing: 0) {
+            ForEach(Array(options.enumerated()), id: \.element.id) { index, option in
                 let isSelected = option == selection
+                if index > 0 {
+                    Rectangle().fill(BlitztextTheme.subtleStroke.opacity(2)).frame(width: 1)
+                }
                 Button {
-                    selection = option
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { selection = option }
                 } label: {
-                    Text(label(option))
-                        .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
-                        .foregroundStyle(isSelected ? .primary : .secondary)
-                        .lineLimit(1)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .frame(maxWidth: .infinity)
-                        .background {
-                            if isSelected {
-                                RoundedRectangle(cornerRadius: 5)
-                                    .fill(Color.primary.opacity(0.10))
-                            }
+                    HStack(spacing: 4) {
+                        if isSelected {
+                            Image(systemName: "checkmark")
+                                .font(.ui(9.5, .bold))
                         }
-                        .contentShape(Rectangle())
+                        Text(label(option))
+                            .font(.ui(11.5, isSelected ? .semibold : .regular))
+                            .lineLimit(1)
+                    }
+                    .foregroundStyle(isSelected ? BlitztextTheme.onTonal : Color.primary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity)
+                    .background(isSelected ? BlitztextTheme.tonal : .clear)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
-        .padding(3)
-        .background(Color.primary.opacity(0.05))
-        .clipShape(RoundedRectangle(cornerRadius: 7))
+        .fixedSize(horizontal: false, vertical: true)
+        .clipShape(Capsule())
+        .overlay(Capsule().strokeBorder(BlitztextTheme.subtleStroke.opacity(2), lineWidth: 1))
     }
 }
 
@@ -419,14 +498,14 @@ struct ModelRatingView: View {
     var body: some View {
         HStack(spacing: 6) {
             Text(label)
-                .font(.system(size: 10))
+                .font(.ui(10.5))
                 .foregroundStyle(.secondary)
                 .frame(width: 66, alignment: .leading)
             GeometryReader { proxy in
                 ZStack(alignment: .leading) {
-                    Capsule().fill(Color.primary.opacity(0.08))
+                    Capsule().fill(BlitztextTheme.inset)
                     Capsule()
-                        .fill(Color.primary.opacity(0.55))
+                        .fill(BlitztextTheme.accent)
                         .frame(width: proxy.size.width * min(max(value, 0), 1))
                 }
             }
@@ -445,17 +524,17 @@ struct ModelRatingPanel: View {
             ModelRatingView(label: "Tempo", value: rating.speed)
             ModelRatingView(label: "Genauigkeit", value: rating.accuracy)
             Text(rating.languages)
-                .font(.system(size: 10))
+                .font(.ui(10.5))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             Text("\(rating.sizeLabel). Richtwerte aus veröffentlichten Benchmarks, nicht auf diesem Mac gemessen.")
-                .font(.system(size: 10))
+                .font(.ui(10.5))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             if modelName == ParakeetTranscriber.modelName {
                 // CC BY 4.0 requires attribution.
                 Text((try? AttributedString(markdown: ParakeetTranscriber.attribution)) ?? AttributedString(ParakeetTranscriber.attribution))
-                    .font(.system(size: 10))
+                    .font(.ui(10.5))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -465,7 +544,7 @@ struct ModelRatingPanel: View {
 
 // MARK: - Popover Host
 
-/// Hosts the SwiftUI root in an HUD material, like _Space. The popover height follows the content.
+/// Hosts the SwiftUI root on the page surface. The popover height follows the content.
 final class GlassPopoverHostingController<Content: View>: NSViewController {
     private let rootView: Content
     private let width: CGFloat
@@ -482,13 +561,7 @@ final class GlassPopoverHostingController<Content: View>: NSViewController {
     }
 
     override func loadView() {
-        let effectView = NSVisualEffectView(frame: NSRect(x: 0, y: 0, width: width, height: 400))
-        effectView.material = .hudWindow
-        effectView.blendingMode = .behindWindow
-        effectView.state = .active
-        effectView.wantsLayer = true
-        effectView.layer?.backgroundColor = NSColor.clear.cgColor
-        view = effectView
+        view = PageView(frame: NSRect(x: 0, y: 0, width: width, height: 400))
     }
 
     override func viewDidLoad() {
@@ -512,8 +585,35 @@ final class GlassPopoverHostingController<Content: View>: NSViewController {
         ])
     }
 
+    override func viewWillAppear() {
+        super.viewWillAppear()
+        (view as? PageView)?.tintPopoverFrame()
+    }
+
     override func preferredContentSizeDidChange(for viewController: NSViewController) {
         super.preferredContentSizeDidChange(for: viewController)
         preferredContentSize = viewController.preferredContentSize
+    }
+}
+
+/// Root of the popover. Gives the popover's own frame, arrow included, the page colour,
+/// again whenever the appearance changes.
+private final class PageView: NSView {
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        tintPopoverFrame()
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        tintPopoverFrame()
+    }
+
+    func tintPopoverFrame() {
+        guard let frameView = window?.contentView?.superview else { return }
+        frameView.wantsLayer = true
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            frameView.layer?.backgroundColor = NSColor(BlitztextTheme.page).cgColor
+        }
     }
 }

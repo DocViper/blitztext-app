@@ -54,8 +54,13 @@ final class AppState {
             if oldValue.historyRetention != appSettings.historyRetention {
                 history.updateRetention(appSettings.historyRetention)
             }
+            if oldValue.showsRecordingIndicator != appSettings.showsRecordingIndicator {
+                onRecordingIndicatorSettingChange?()
+            }
         }
     }
+    /// Lets the recording pill react at once when its setting changes.
+    var onRecordingIndicatorSettingChange: (() -> Void)?
     var transcriptionSettings: TranscriptionSettings {
         didSet { saveSettings() }
     }
@@ -123,6 +128,10 @@ final class AppState {
         self.dampfAblassenSettings = Self.loadDampfAblassenSettings()
         self.emojiTextSettings = Self.loadEmojiTextSettings()
         self.history = TranscriptHistoryStore(retention: loadedAppSettings.historyRetention)
+        #if DEBUG
+        // Snapshot runs only draw: no keychain, no model loading, no settings changes.
+        if UserDefaults.standard.string(forKey: "BlitztextSnapshotDir") != nil { return }
+        #endif
         hotkeyService.updateCustomHotkeys(appSettings.resolvedCustomHotkeys)
         refreshAccessibilityPermission()
         KeychainService.removeLegacyServerCredentials()
@@ -531,6 +540,9 @@ final class AppState {
     }
 
     func refreshAccessibilityPermission() {
+        #if DEBUG
+        if MacSnapshots.folder != nil { return }
+        #endif
         accessibilityPermissionGranted = AccessibilityPermissionService.currentStatus()
     }
 

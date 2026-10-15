@@ -3,7 +3,16 @@ import AppKit
 
 struct SettingsContentView: View {
     @Bindable var appState: AppState
-    @State private var activePane: SettingsPane = .general
+    @State private var activePane: SettingsPane = Self.initialPane
+
+    #if DEBUG
+    /// Pane the snapshot renderer opens; nil in normal use.
+    static var debugInitialPane: SettingsPane?
+    private static var debugPaneOverride: SettingsPane? { debugInitialPane }
+    #else
+    private static var debugPaneOverride: SettingsPane? { nil }
+    #endif
+    private static var initialPane: SettingsPane { debugPaneOverride ?? .general }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -24,7 +33,7 @@ struct SettingsContentView: View {
         }
         .onAppear {
             appState.refreshAccessibilityPermission()
-            activePane = defaultPane
+            activePane = Self.debugPaneOverride ?? defaultPane
         }
     }
 
@@ -60,7 +69,7 @@ private struct SectionLabel: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 12.5, weight: .semibold))
+            .font(.ui(12.5, .semibold))
     }
 }
 
@@ -74,17 +83,17 @@ struct PermissionWarningSection: View {
         SettingsSection(title: "Berechtigungen") {
             HStack(alignment: .top, spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.ui(12, .semibold))
                     .foregroundStyle(BlitztextTheme.danger)
                     .frame(width: 18, height: 18)
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Direktes Einf\u{00FC}gen ist noch nicht freigegeben.")
-                        .font(.system(size: 11.5, weight: .semibold))
+                        .font(.ui(11.5, .semibold))
                         .foregroundStyle(.primary)
 
                     Text("\u{00D6}ffne Bedienungshilfen und aktiviere Blitztext. Falls Blitztext schon aktiv ist, einmal aus- und wieder einschalten.")
-                        .font(.system(size: 10.5))
+                        .font(.ui(12))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -111,7 +120,8 @@ struct InstallationWarningSection: View {
     @State private var installActionErrorText: String?
 
     static var isNeeded: Bool {
-        !BlitztextInstallLocationService.currentInstallLocation.isCanonicalInstall
+        guard !BlitztextInstallLocationService.isPreviewBuild else { return false }
+        return !BlitztextInstallLocationService.currentInstallLocation.isCanonicalInstall
             || !BlitztextInstallLocationService.otherInstalledBundleURLs.isEmpty
     }
 
@@ -119,11 +129,11 @@ struct InstallationWarningSection: View {
         SettingsSection(title: "Installation") {
 
             Text(installationHeadline)
-                .font(.system(size: 11.5, weight: .semibold))
+                .font(.ui(11.5, .semibold))
                 .foregroundStyle(.primary)
 
             Text(installationDetail)
-                .font(.system(size: 10.5))
+                .font(.ui(12))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -134,7 +144,7 @@ struct InstallationWarningSection: View {
 
             if !BlitztextInstallLocationService.otherInstalledBundleURLs.isEmpty {
                 Text("Auf diesem Mac liegen weitere Blitztext-Kopien. Behalte nur eine, sonst startet die App womöglich doppelt.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -162,7 +172,7 @@ struct InstallationWarningSection: View {
 
             if let installActionErrorText {
                 Text(installActionErrorText)
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(BlitztextTheme.danger)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -233,7 +243,7 @@ struct LaunchAtLoginSection: View {
             .toggleStyle(.trailingSwitch)
 
             Text(launchAtLoginService.errorText ?? launchAtLoginService.helperText)
-                .font(.system(size: 10.5))
+                .font(.ui(12))
                 .foregroundStyle(
                     launchAtLoginService.errorText == nil
                         ? AnyShapeStyle(.secondary)
@@ -261,7 +271,7 @@ struct AboutBlitztextSection: View {
 
             HStack(spacing: 10) {
                 Text("Version \(appVersion)")
-                    .font(.system(size: 11.5, weight: .semibold))
+                    .font(.ui(11.5, .semibold))
                 Spacer(minLength: 8)
                 Button {
                     if let url = URL(string: Self.repositoryURL) {
@@ -275,7 +285,7 @@ struct AboutBlitztextSection: View {
                             .resizable()
                             .frame(width: 13, height: 13)
                     }
-                    .font(.system(size: 11.5, weight: .medium))
+                    .font(.ui(11.5, .medium))
                 }
                 .buttonStyle(.glassAction)
                 .help("Blitztext ist Open Source. Ein Stern auf GitHub hilft.")
@@ -295,13 +305,13 @@ struct AboutBlitztextSection: View {
 
             if appState.appUpdateService.isManagedByDeviceManagement {
                 Text("Neue Versionen installiert die Ger\u{00E4}teverwaltung dieses Macs automatisch.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } else if appState.appUpdateService.updatesInApp {
                 if !BlitztextInstallLocationService.currentInstallLocation.isCanonicalInstall {
                     Text("Auto-Updates laufen erst sauber, wenn Blitztext aus /Applications gestartet wird.")
-                        .font(.system(size: 10.5))
+                        .font(.ui(12))
                         .foregroundStyle(.primary)
                         .fixedSize(horizontal: false, vertical: true)
                 } else {
@@ -324,13 +334,13 @@ struct AboutBlitztextSection: View {
                 }
 
                 Text(appState.appUpdateService.statusText)
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
                 // No update feed in this build: new versions come from the releases page.
                 Text("Neue Versionen gibt es auf der Releases-Seite.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -349,7 +359,7 @@ struct AboutBlitztextSection: View {
                     .toggleStyle(.trailingSwitch)
 
                 Text("Entfernt auch den Anmeldestart. Danach Blitztext beenden und die App aus /Applications l\u{00F6}schen.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -374,14 +384,14 @@ struct AboutBlitztextSection: View {
 
             if let cleanupStatusText {
                 Text(cleanupStatusText)
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
             if let cleanupErrorText {
                 Text(cleanupErrorText)
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(BlitztextTheme.danger)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -499,7 +509,7 @@ struct CustomizeSettingsView: View {
                                 .frame(width: 92, alignment: .leading)
                                 .help(replaced ? "Ersetzt durch dein eigenes K\u{00FC}rzel" : "Standard-K\u{00FC}rzel, nur auf Apple-Tastaturen")
                             Text(appState.displayName(for: type))
-                                .font(.system(size: 11.5, weight: .medium))
+                                .font(.ui(11.5, .medium))
                                 .lineLimit(1)
                             Spacer(minLength: 4)
                             HotkeyRecorderButton(appState: appState, type: type)
@@ -508,14 +518,14 @@ struct CustomizeSettingsView: View {
                 }
 
                 Text("Eigenes K\u{00FC}rzel rechts festlegen, z.\u{202F}B. \u{2303}\u{2325}D oder F13. Es ersetzt das fn-K\u{00FC}rzel dieses Modus. N\u{00F6}tig f\u{00FC}r externe Tastaturen, dort funktioniert fn nicht. \u{2303}Space und \u{2303}\u{2325}Space belegt macOS f\u{00FC}r die Eingabequelle.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 // Mode picker
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Modus")
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .foregroundStyle(.secondary)
 
                     SegmentedToggle(
@@ -529,45 +539,53 @@ struct CustomizeSettingsView: View {
             // MARK: Aufnahme & Einfuegen
             SettingsSection(title: "Aufnahme & Einf\u{00FC}gen") {
 
+                Toggle("Aufnahme unten am Bildschirm zeigen", isOn: $appState.appSettings.showsRecordingIndicator)
+                    .toggleStyle(.trailingSwitch)
+
+                Text("Eine kleine lila Anzeige bewegt sich mit deiner Stimme, solange Blitztext aufnimmt und schreibt. Ein Klick darauf stoppt die Aufnahme.")
+                    .font(.ui(12))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
                 Toggle("Ton aus w\u{00E4}hrend der Aufnahme", isOn: $appState.appSettings.muteOutputWhileRecording)
                     .toggleStyle(.trailingSwitch)
-                    .font(.system(size: 11.5))
+                    .font(.ui(11.5))
 
                 Text("Podcast, Musik oder Video sind stumm, solange Blitztext aufnimmt, und danach sofort wieder zu h\u{00F6}ren. Pausieren kann Blitztext sie nicht, weil macOS Apps nicht verr\u{00E4}t, was gerade l\u{00E4}uft.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Toggle("Zwischenablage danach wiederherstellen", isOn: $appState.appSettings.restoreClipboardAfterPaste)
                     .toggleStyle(.trailingSwitch)
-                    .font(.system(size: 11.5))
+                    .font(.ui(11.5))
 
                 Text("Was du vorher kopiert hattest, ist nach dem Einf\u{00FC}gen wieder da.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Toggle("Automatische Abs\u{00E4}tze", isOn: $appState.appSettings.automaticParagraphs)
                     .toggleStyle(.trailingSwitch)
-                    .font(.system(size: 11.5))
+                    .font(.ui(11.5))
 
                 Text("Lange Diktate und Audiodateien bekommen nach etwa vier S\u{00E4}tzen einen Absatz. W\u{00F6}rter und Satzzeichen bleiben, wie sie sind.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Toggle("An den Text am Cursor anpassen", isOn: $appState.appSettings.fitToSurroundingText)
                     .toggleStyle(.trailingSwitch)
-                    .font(.system(size: 11.5))
+                    .font(.ui(11.5))
 
                 Text("Setzt Leerzeichen und Gro\u{00DF}- und Kleinschreibung passend zum Text davor und danach. Blitztext liest dazu das Textfeld \u{00FC}ber die Bedienungshilfen, Passwortfelder nie.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Verlauf aufbewahren")
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .foregroundStyle(.secondary)
 
                     SegmentedToggle(
@@ -577,7 +595,7 @@ struct CustomizeSettingsView: View {
                     )
 
                     Text("Nur auf diesem Mac und verschl\u{00FC}sselt. Aus l\u{00F6}scht den Verlauf sofort.")
-                        .font(.system(size: 10.5))
+                        .font(.ui(12))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -593,23 +611,23 @@ struct CustomizeSettingsView: View {
             SettingsSection(title: "Spracherkennung") {
 
                 Text("Blitztext transkribiert immer auf diesem Mac. Das Audio verlässt das Gerät nicht.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 HStack(spacing: 6) {
                     Image(systemName: appState.selectedLocalModelIsInstalled ? "checkmark.circle.fill" : "arrow.down.circle.fill")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.ui(11, .semibold))
                         .foregroundStyle(appState.selectedLocalModelIsInstalled ? BlitztextTheme.accent : .secondary)
                     Text(appState.selectedLocalModelIsInstalled ? installedModelsText : "Das ausgewählte Modell wird beim Installieren lokal gespeichert.")
-                        .font(.system(size: 10.5))
+                        .font(.ui(12))
                         .foregroundStyle(.secondary)
                     Spacer()
                 }
 
                 HStack(spacing: 8) {
                     Text("Lokales Modell")
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .foregroundStyle(.secondary)
 
                     Picker("", selection: Binding(
@@ -633,7 +651,7 @@ struct CustomizeSettingsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         ProgressView(value: progress)
                         Text(appState.localModelDownloadStatusText ?? "Modell wird geladen...")
-                            .font(.system(size: 10.5))
+                            .font(.ui(12))
                             .foregroundStyle(.secondary)
                     }
                 } else {
@@ -645,13 +663,13 @@ struct CustomizeSettingsView: View {
                         .disabled(appState.selectedLocalModelIsInstalled)
 
                         Link("Modellseite", destination: LocalTranscriptionService.modelPageURL(for: appState.selectedLocalModelName))
-                            .font(.system(size: 10.5, weight: .medium))
+                            .font(.ui(10.5, .medium))
                     }
                 }
 
                 if let errorText = appState.localModelDownloadErrorText {
                     Text(errorText)
-                        .font(.system(size: 10.5))
+                        .font(.ui(12))
                         .foregroundStyle(BlitztextTheme.danger)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -669,16 +687,16 @@ struct CustomizeSettingsView: View {
                 .labelsHidden()
 
                 Text(aiEngineStatusText)
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Toggle("KI-Modi sehen den Text am Cursor", isOn: $appState.appSettings.aiSeesFieldContext)
                     .toggleStyle(.trailingSwitch)
-                    .font(.system(size: 11.5))
+                    .font(.ui(11.5))
 
                 Text("Blitztext+, $%&! und :) bekommen den Text rund um den Cursor als Kontext, etwa die Mail, auf die du antwortest. Mit einem Modell-Anbieter geht dieser Text mit an den Anbieter.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -693,7 +711,7 @@ struct CustomizeSettingsView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Schreibstil")
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .foregroundStyle(.secondary)
 
                     SegmentedToggle(
@@ -705,12 +723,12 @@ struct CustomizeSettingsView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Kontext")
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .foregroundStyle(.secondary)
 
                     TextField("z.B. \"E-Mails im Bereich Unternehmensberatung\"", text: $appState.textImprovementSettings.context)
                         .textFieldStyle(.roundedBorder)
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                 }
 
                 DisclosureGroup(isExpanded: $showsImproverPrompt) {
@@ -722,7 +740,7 @@ struct CustomizeSettingsView: View {
                     .padding(.top, 6)
                 } label: {
                     Text(appState.textImprovementSettings.systemPrompt.isEmpty ? "Eigene Anweisung" : "Eigene Anweisung (aktiv)")
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -748,7 +766,7 @@ struct CustomizeSettingsView: View {
                     .padding(.top, 6)
                 } label: {
                     Text(dampfPromptIsCustom ? "Anweisung (angepasst)" : "Anweisung (Standard)")
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -759,7 +777,7 @@ struct CustomizeSettingsView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Emoji-Dichte")
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .foregroundStyle(.secondary)
 
                     SegmentedToggle(
@@ -778,7 +796,7 @@ struct CustomizeSettingsView: View {
             SettingsSection(title: "Eigennamen") {
 
                 Text("Namen und Fachbegriffe, die Blitztext genau so schreiben soll. KI-Modi \u{00FC}bernehmen sie unver\u{00E4}ndert.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -788,14 +806,14 @@ struct CustomizeSettingsView: View {
                         ForEach(appState.textImprovementSettings.customTerms, id: \.self) { term in
                             HStack(spacing: 3) {
                                 Text(term)
-                                    .font(.system(size: 10.5))
+                                    .font(.ui(12))
                                 Button {
                                     withAnimation(.easeOut(duration: 0.15)) {
                                         appState.textImprovementSettings.customTerms.removeAll { $0 == term }
                                     }
                                 } label: {
                                     Image(systemName: "xmark")
-                                        .font(.system(size: 7, weight: .bold))
+                                        .font(.ui(7, .bold))
                                         .foregroundStyle(.tertiary)
                                 }
                                 .buttonStyle(SubtleButtonStyle())
@@ -817,12 +835,12 @@ struct CustomizeSettingsView: View {
                 HStack(spacing: 6) {
                     TextField("Neuer Begriff", text: $newTerm)
                         .textFieldStyle(.roundedBorder)
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .onSubmit { addTerm() }
 
                     Button { addTerm() } label: {
                         Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 16))
+                            .font(.ui(16))
                             .foregroundStyle(BlitztextTheme.accent)
                     }
                     .buttonStyle(SubtleButtonStyle())
@@ -831,17 +849,17 @@ struct CustomizeSettingsView: View {
 
                 Toggle("Eigennamen automatisch korrigieren", isOn: $appState.appSettings.correctCustomTermsEnabled)
                     .toggleStyle(.trailingSwitch)
-                    .font(.system(size: 11.5))
+                    .font(.ui(11.5))
 
                 Text("Korrigiert \u{00E4}hnlich klingende Schreibweisen auf deine Eigennamen, z.\u{202F}B. \u{201E}Black Boat\u{201C} zu \u{201E}Blackboat\u{201C}. Echte W\u{00F6}rter bleiben unver\u{00E4}ndert.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
             SettingsSection(title: "Ersetzungen") {
                 Text("F\u{00FC}r Begriffe, die anders klingen, als sie geschrieben werden. Zum Beispiel wird aus \u{201E}n acht n\u{201C} immer \u{201E}n8n\u{201C}.")
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -850,7 +868,7 @@ struct CustomizeSettingsView: View {
                         Text(rule.spoken)
                             .foregroundStyle(.secondary)
                         Image(systemName: "arrow.right")
-                            .font(.system(size: 8, weight: .semibold))
+                            .font(.ui(8, .semibold))
                             .foregroundStyle(.tertiary)
                         Text(rule.written)
                             .fontWeight(.semibold)
@@ -861,29 +879,29 @@ struct CustomizeSettingsView: View {
                             }
                         } label: {
                             Image(systemName: "xmark")
-                                .font(.system(size: 7, weight: .bold))
+                                .font(.ui(7, .bold))
                                 .foregroundStyle(.tertiary)
                         }
                         .buttonStyle(SubtleButtonStyle())
                         .help("Ersetzung entfernen")
                     }
-                    .font(.system(size: 10.5))
+                    .font(.ui(12))
                 }
 
                 HStack(spacing: 6) {
                     TextField("Gesprochen", text: $newSpoken)
                         .textFieldStyle(.roundedBorder)
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                     Image(systemName: "arrow.right")
-                        .font(.system(size: 9))
+                        .font(.ui(9))
                         .foregroundStyle(.tertiary)
                     TextField("Geschrieben", text: $newWritten)
                         .textFieldStyle(.roundedBorder)
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .onSubmit { addReplacement() }
                     Button { addReplacement() } label: {
                         Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 16))
+                            .font(.ui(16))
                             .foregroundStyle(BlitztextTheme.accent)
                     }
                     .buttonStyle(SubtleButtonStyle())
@@ -894,7 +912,7 @@ struct CustomizeSettingsView: View {
             SettingsSection(title: "F\u{00FC}llw\u{00F6}rter") {
                 Toggle("\u{201E}\u{00C4}h\u{201C} und \u{201E}\u{00E4}hm\u{201C} entfernen", isOn: $appState.appSettings.removeFillerWordsEnabled)
                     .toggleStyle(.trailingSwitch)
-                    .font(.system(size: 11.5))
+                    .font(.ui(11.5))
             }
             }
 
@@ -943,7 +961,7 @@ private struct ModeSummary: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(type.subtitle)
-                .font(.system(size: 11))
+                .font(.ui(12))
                 .foregroundStyle(.secondary)
             Spacer(minLength: 6)
             Text(appState.hotkeyLabel(for: type))
@@ -961,7 +979,7 @@ private struct PromptEditor: View {
 
     var body: some View {
         TextEditor(text: $text)
-            .font(.system(size: 11))
+            .font(.ui(12))
             .frame(height: height)
             .scrollContentBackground(.hidden)
             .padding(8)
@@ -970,7 +988,7 @@ private struct PromptEditor: View {
             .overlay(alignment: .topLeading) {
                 if text.isEmpty {
                     Text(placeholder)
-                        .font(.system(size: 11))
+                        .font(.ui(12))
                         .foregroundStyle(.quaternary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 12)
@@ -1029,7 +1047,7 @@ struct HotkeyRecorderButton: View {
                     appState.setCustomHotkey(nil, for: type)
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 10))
+                        .font(.ui(10.5))
                         .foregroundStyle(.tertiary)
                 }
                 .buttonStyle(SubtleButtonStyle())
