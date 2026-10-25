@@ -1,13 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 
-# Blitztext macOS App - Build & Run
-# Voraussetzungen: Xcode Command Line Tools, xcodegen
+# SprachZuText für Intel-Mac - Build & Run
+# Inoffizieller Fork von cmagnussen/blitztext-app, nur für Macs mit Intel-Prozessor.
+# Voraussetzungen: Xcode 16.2 oder neuer, xcodegen (brew install xcodegen)
 
 RUN_AFTER=false
 INSTALL_APP=false
+CLEAN_BUILD=false
 BUILD_CONFIGURATION="Release"
-UNIVERSAL_ARCHS="arm64 x86_64"
+BUILD_ARCH="x86_64"
 
 for arg in "$@"; do
     case "$arg" in
@@ -23,15 +25,24 @@ for arg in "$@"; do
         --release)
             BUILD_CONFIGURATION="Release"
             ;;
+        --clean)
+            CLEAN_BUILD=true
+            ;;
         *)
             echo "Unbekannte Option: $arg"
-            echo "Verwendung: ./build.sh [--install] [--run] [--release] [--debug]"
+            echo "Verwendung: ./build.sh [--install] [--run] [--release] [--debug] [--clean]"
             exit 1
             ;;
     esac
 done
 
-verify_universal_app() {
+if [ "$(uname -m)" != "x86_64" ]; then
+    echo "❌ Dieser Fork ist nur für Macs mit Intel-Prozessor gedacht."
+    echo "   Auf Apple Silicon bitte das Original verwenden: https://github.com/cmagnussen/blitztext-app"
+    exit 1
+fi
+
+verify_x86_64_app() {
     local app_path="$1"
     local app_name
     local binary_path
@@ -47,30 +58,25 @@ verify_universal_app() {
 
     archs="$(lipo -archs "$binary_path" 2>/dev/null || true)"
 
-    if [[ -z "$archs" ]]; then
-        echo "❌ Konnte Architekturen nicht lesen: $binary_path"
+    if [[ " $archs " != *" x86_64 "* ]]; then
+        echo "❌ Build enthält keinen x86_64-Teil. Gefunden: ${archs:-nichts}"
         file "$binary_path" 2>/dev/null || true
         exit 1
     fi
 
-    if [[ " $archs " != *" arm64 "* || " $archs " != *" x86_64 "* ]]; then
-        echo "❌ Build ist nicht universal. Erwartet: arm64 + x86_64"
-        echo "   Gefunden: $archs"
-        file "$binary_path" 2>/dev/null || true
-        exit 1
-    fi
-
-    echo "✅ Universal Binary verifiziert: $archs"
+    echo "✅ Intel-Build verifiziert: $archs"
 }
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$SCRIPT_DIR/BlitztextMac"
 PROJECT_FILE="$PROJECT_DIR/BlitztextMac.xcodeproj"
+WHISPERKIT_PATCH="$SCRIPT_DIR/patches/whisperkit-intel.patch"
 # Keep DerivedData outside iCloud-synced folders (Desktop/Documents): the file
 # provider adds com.apple.FinderInfo xattrs to bundles, which breaks codesign with
 # "resource fork, Finder information, or similar detritus not allowed".
 # (cmagnussen/blitztext-app PR #5)
 DERIVED_DATA_PATH="$HOME/Library/Caches/blitztext-build/derivedData"
+SOURCE_PACKAGES_PATH="$DERIVED_DATA_PATH/SourcePackages"
 cd "$PROJECT_DIR"
 
 if command -v xcodegen &> /dev/null; then
@@ -89,27 +95,60 @@ else
     exit 1
 fi
 
+# Swift-Pakete laden, damit WhisperKit für Intel gepatcht werden kann.
+echo "📦 Lade Swift-Pakete ..."
+xcodebuild -resolvePackageDependencies \
+    -project BlitztextMac.xcodeproj \
+    -scheme BlitztextMac \
+    -derivedDataPath "$DERIVED_DATA_PATH" \
+    -clonedSourcePackagesDirPath "$SOURCE_PACKAGES_PATH" 2>&1 | tail -n 3
+
+# WhisperKit rechnet auf Intel-Macs mit Float statt Float16 und stürzt sonst beim
+# Diktieren ab. Der Patch korrigiert die Speicherzugriffe (patches/whisperkit-intel.patch).
+WHISPERKIT_CHECKOUT="$SOURCE_PACKAGES_PATH/checkouts/argmax-oss-swift"
+if [ ! -d "$WHISPERKIT_CHECKOUT" ]; then
+    echo "❌ WhisperKit wurde nicht gefunden: $WHISPERKIT_CHECKOUT"
+    exit 1
+fi
+if git -C "$WHISPERKIT_CHECKOUT" apply --reverse --check "$WHISPERKIT_PATCH" 2>/dev/null; then
+    echo "✅ WhisperKit-Intel-Patch ist bereits angewendet."
+elif git -C "$WHISPERKIT_CHECKOUT" apply --check "$WHISPERKIT_PATCH" 2>/dev/null; then
+    chmod -R u+w "$WHISPERKIT_CHECKOUT"
+    git -C "$WHISPERKIT_CHECKOUT" apply "$WHISPERKIT_PATCH"
+    echo "✅ WhisperKit-Intel-Patch angewendet."
+else
+    echo "❌ Der WhisperKit-Patch passt nicht zur geladenen Version."
+    echo "   Erwartet ist Version 0.18.0 (siehe BlitztextMac/project.yml)."
+    exit 1
+fi
+
 # Bauen
-echo "🔨 Baue Blitztext ..."
+BUILD_ACTIONS=(build)
+if [ "$CLEAN_BUILD" = true ]; then
+    BUILD_ACTIONS=(clean build)
+fi
+
+echo "🔨 Baue SprachZuText ..."
 xcodebuild \
     -project BlitztextMac.xcodeproj \
     -scheme BlitztextMac \
     -destination 'platform=macOS' \
     -configuration "$BUILD_CONFIGURATION" \
     -derivedDataPath "$DERIVED_DATA_PATH" \
-    ONLY_ACTIVE_ARCH=NO \
-    ARCHS="$UNIVERSAL_ARCHS" \
-    clean build
+    -clonedSourcePackagesDirPath "$SOURCE_PACKAGES_PATH" \
+    ONLY_ACTIVE_ARCH=YES \
+    ARCHS="$BUILD_ARCH" \
+    "${BUILD_ACTIONS[@]}"
 
 # App finden
-APP_PATH="$DERIVED_DATA_PATH/Build/Products/$BUILD_CONFIGURATION/Blitztext.app"
+APP_PATH="$DERIVED_DATA_PATH/Build/Products/$BUILD_CONFIGURATION/SprachZuText.app"
 
 if [ ! -d "$APP_PATH" ]; then
     echo "❌ Build fehlgeschlagen – keine App gefunden."
     exit 1
 fi
 
-verify_universal_app "$APP_PATH"
+verify_x86_64_app "$APP_PATH"
 
 # Resources manuell ins Bundle kopieren (xcodegen kopiert sie nicht automatisch)
 echo "📋 Kopiere Resources ..."
@@ -123,14 +162,14 @@ cp -f "$PROJECT_DIR/Resources/menubar_icon@2x.png" "$RESOURCES_DIR/" 2>/dev/null
 # im Projektordner (cmagnussen/blitztext-app PR #16).
 if [ "$INSTALL_APP" = true ]; then
     APPS_DIR="/Applications"
-    DEST="$APPS_DIR/Blitztext.app"
+    DEST="$APPS_DIR/SprachZuText.app"
     if [ ! -w "$APPS_DIR" ]; then
         echo "❌ /Applications ist nicht beschreibbar."
         echo "   Fuehre den Befehl mit passenden Rechten erneut aus oder ziehe die App manuell nach /Applications."
         exit 1
     fi
 else
-    DEST="$SCRIPT_DIR/Blitztext.app"
+    DEST="$SCRIPT_DIR/SprachZuText.app"
 fi
 
 rm -rf "$DEST"
@@ -138,7 +177,7 @@ cp -R "$APP_PATH" "$DEST"
 # iCloud or the file provider may have added xattrs again; codesign refuses them.
 xattr -cr "$DEST" 2>/dev/null || true
 codesign --force --deep --sign - "$DEST" 2>&1
-verify_universal_app "$DEST"
+verify_x86_64_app "$DEST"
 
 RUN_TARGET="$DEST"
 
@@ -147,19 +186,18 @@ echo "✅ Fertig! App liegt unter:"
 echo "   $DEST"
 echo ""
 echo "Build-Typ: $BUILD_CONFIGURATION"
-echo "Architekturen: $UNIVERSAL_ARCHS"
-echo "Kompatibel: Apple Silicon + Intel (macOS 14+)"
+echo "Architektur: $BUILD_ARCH (Intel-Macs, macOS 14+)"
 echo ""
 echo "Naechste Schritte:"
 echo "1. App starten"
 echo "2. Mikrofon erlauben"
 echo "3. Fuer direktes Einfuegen zusaetzlich Bedienungshilfen erlauben"
-echo "4. Lokales Sprachmodell laden, optional einen Modell-Anbieter mit API-Key eintragen"
-echo "5. Fertige, signierte Version: https://github.com/cmagnussen/blitztext-app/releases"
+echo "   (nach jedem Neubau den alten Eintrag entfernen und die neue App hinzufuegen)"
+echo "4. Lokales Whisper-Modell laden, optional einen Modell-Anbieter mit API-Key eintragen"
 echo ""
 
 # Optional: direkt starten
 if [ "$RUN_AFTER" = true ]; then
-    echo "🚀 Starte Blitztext ..."
+    echo "🚀 Starte SprachZuText ..."
     open "$RUN_TARGET"
 fi

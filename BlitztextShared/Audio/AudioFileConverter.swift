@@ -23,7 +23,7 @@ enum AudioFileConverter {
 
         var errorDescription: String? {
             switch self {
-            case .unreadable: return "Diese Audiodatei kann Blitztext nicht öffnen."
+            case .unreadable: return "Diese Audiodatei kann SprachZuText nicht öffnen."
             case .empty: return "Die Audiodatei ist leer."
             }
         }

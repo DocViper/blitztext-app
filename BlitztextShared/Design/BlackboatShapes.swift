@@ -99,30 +99,3 @@ struct TypingIndicator: View {
         .accessibilityLabel("Lädt")
     }
 }
-
-/// The Blackboat mark (design-system/brand/logos/mark-*.svg): five diagonal stripes,
-/// drawn from the SVG geometry so it stays sharp and takes the ink of the theme.
-struct BlackboatMark: Shape {
-    private static let viewBox: CGFloat = 96.66
-    /// x, y, width, height and the translation of each stripe, before the -45° turn.
-    private static let stripes: [(CGRect, CGPoint)] = [
-        (CGRect(x: -7.73, y: 24.46, width: 71.79, height: 7.58), CGPoint(x: -11.72, y: 28.19)),
-        (CGRect(x: 2.36, y: 34.54, width: 71.79, height: 7.58), CGPoint(x: -15.9, y: 38.27)),
-        (CGRect(x: 13.61, y: 47.44, width: 63.81, height: 7.58), CGPoint(x: -22.89, y: 47.18)),
-        (CGRect(x: 22.52, y: 54.7, width: 71.79, height: 7.58), CGPoint(x: -24.25, y: 58.43)),
-        (CGRect(x: 32.6, y: 64.78, width: 71.79, height: 7.58), CGPoint(x: -28.43, y: 68.52))
-    ]
-
-    func path(in rect: CGRect) -> Path {
-        let scale = min(rect.width, rect.height) / Self.viewBox
-        var path = Path()
-        for (stripe, offset) in Self.stripes {
-            let transform = CGAffineTransform(rotationAngle: -.pi / 4)
-                .concatenating(CGAffineTransform(translationX: offset.x, y: offset.y))
-                .concatenating(CGAffineTransform(scaleX: scale, y: scale))
-                .concatenating(CGAffineTransform(translationX: rect.minX, y: rect.minY))
-            path.addPath(Path(stripe), transform: transform)
-        }
-        return path
-    }
-}

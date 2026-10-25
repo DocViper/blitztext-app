@@ -113,7 +113,7 @@ enum AIProviderStore {
 /// API keys in the system Keychain, one per provider. Available after the first unlock,
 /// so dictations finishing in the background can still use them.
 enum APIKeyStore {
-    private static let service = "app.blitztext.ai-provider"
+    private static let service = "io.github.docviper.sprachzutext.ai-provider"
 
     static func key(for provider: AIProvider) -> String? {
         var query = baseQuery(provider)

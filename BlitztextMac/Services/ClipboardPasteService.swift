@@ -1,7 +1,7 @@
 import AppKit
 import OSLog
 
-private let pasteLogger = Logger(subsystem: "app.blitztext.mac", category: "Paste")
+private let pasteLogger = Logger(subsystem: "io.github.docviper.sprachzutext", category: "Paste")
 
 /// Monotonic seconds, unaffected by changes to the wall clock.
 private func uptime() -> TimeInterval {

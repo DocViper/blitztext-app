@@ -3,7 +3,7 @@ import AppKit
 import Observation
 import OSLog
 
-private let tapTalkLogger = Logger(subsystem: "app.blitztext.mac", category: "TapTalk")
+private let tapTalkLogger = Logger(subsystem: "io.github.docviper.sprachzutext", category: "TapTalk")
 
 private func elapsedMilliseconds(since start: Date, until end: Date = Date()) -> Int {
     Int((end.timeIntervalSince(start) * 1000).rounded())

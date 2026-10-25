@@ -52,7 +52,7 @@ struct MenuBarView: View {
                     NoticeRow(
                         icon: "externaldrive.badge.plus",
                         title: "Nach /Applications verschieben",
-                        detail: "So startet Blitztext zuverl\u{00E4}ssig mit dem Mac und bekommt Updates.",
+                        detail: "So startet SprachZuText zuverl\u{00E4}ssig mit dem Mac und bekommt Updates.",
                         actionTitle: "Pr\u{00FC}fen",
                         action: { appState.page = .settings }
                     )
@@ -132,7 +132,7 @@ struct MenuBarView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Einrichtung n\u{00F6}tig")
                 .font(.ui(17, .bold))
-            Text("Installiere in den Einstellungen ein lokales Sprachmodell. Blitztext transkribiert direkt auf diesem Mac.")
+            Text("Installiere in den Einstellungen ein lokales Sprachmodell. SprachZuText transkribiert direkt auf diesem Mac.")
                 .font(.ui(12.5))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -170,7 +170,7 @@ struct MenuBarView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!appState.isWorkflowAvailable(.tapTalk))
-                .help("Blitztext jetzt starten")
+                .help("SprachZuText jetzt starten")
                 .accessibilityLabel("Aufnahme starten")
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -345,7 +345,7 @@ struct MenuBarView: View {
                     .fixedSize()
             }
             .buttonStyle(.glassAction)
-            .help("Sprachmemo oder WhatsApp-Sprachnachricht transkribieren. Du kannst Dateien auch auf das Blitztext-Symbol im Finder ziehen.")
+            .help("Sprachmemo oder WhatsApp-Sprachnachricht transkribieren. Du kannst Dateien auch auf das SprachZuText-Symbol im Finder ziehen.")
 
             Button {
                 appState.page = .history
@@ -393,7 +393,7 @@ struct MenuBarView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     Text("Willkommen")
                         .font(BlackboatType.publicSans(20, .bold, relativeTo: .title3))
-                    Text("bei Blitztext")
+                    Text("bei SprachZuText")
                         .font(.ui(12, .medium))
                         .foregroundStyle(.secondary)
                 }
@@ -425,8 +425,8 @@ struct MenuBarView: View {
                 if BlitztextInstallLocationService.shouldOfferMoveToApplications {
                     NoticeRow(
                         icon: "arrow.down.app",
-                        title: "Lege Blitztext zuerst nach /Applications",
-                        detail: "So startet Blitztext zuverl\u{00E4}ssig mit dem Mac und bekommt Updates."
+                        title: "Lege SprachZuText zuerst nach /Applications",
+                        detail: "So startet SprachZuText zuverl\u{00E4}ssig mit dem Mac und bekommt Updates."
                     )
                 }
 

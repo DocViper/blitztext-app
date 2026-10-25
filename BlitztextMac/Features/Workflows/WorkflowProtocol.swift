@@ -17,11 +17,11 @@ enum WorkflowType: String, CaseIterable, Identifiable, Codable {
 
     var displayName: String {
         switch self {
-        case .tapTalk: return "Blitztext"
-        case .localTapTalk: return "Blitztext Lokal"
-        case .textImprover: return "Blitztext+"
-        case .dampfAblassen: return "Blitztext $%&!"
-        case .emojiText: return "Blitztext :)"
+        case .tapTalk: return "SprachZuText"
+        case .localTapTalk: return "SprachZuText Lokal"
+        case .textImprover: return "SprachZuText+"
+        case .dampfAblassen: return "SprachZuText $%&!"
+        case .emojiText: return "SprachZuText :)"
         }
     }
 

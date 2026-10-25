@@ -1,25 +1,23 @@
 # Support
 
-Blitztext is free and open source, maintained by Blackboat alongside our client work. There is no service-level agreement, paid support channel, or guarantee that issues will be fixed.
+SprachZuText für Intel-Mac ist ein privates, inoffizielles Hobbyprojekt und ein Fork von [cmagnussen/blitztext-app](https://github.com/cmagnussen/blitztext-app). Es gibt keinen Support-Vertrag und keine Garantie, dass Fehler behoben werden.
 
-## Before Asking For Help
+## Bevor du nachfragst
 
-- Make sure you can build the app with `./build.sh --debug`.
-- Check that a local speech model is loaded (Settings > Modelle > Spracherkennung).
-- Confirm that macOS microphone permission is granted.
-- Grant Accessibility permission if you expect automatic paste into other apps.
-- Read [docs/privacy.md](docs/privacy.md) before testing with sensitive content.
+- Prüfe, dass sich die App mit `./build.sh` bauen lässt.
+- Prüfe, dass ein lokales Sprachmodell geladen ist (Einstellungen > Modelle).
+- Prüfe, dass der Mikrofon-Zugriff erlaubt ist.
+- Erlaube die Bedienungshilfen, wenn der Text automatisch in andere Apps eingefügt werden soll.
+- Lies [docs/privacy.md](docs/privacy.md), bevor du mit vertraulichen Inhalten testest.
 
-## Where To Ask
+## Wo du fragen kannst
 
-Use GitHub Issues for reproducible bugs and focused feature ideas.
+Nutze GitHub Issues für nachvollziehbare Fehler. Bitte poste dort nicht:
 
-Please do not post:
+- API-Schlüssel deines Modell-Anbieters
+- Zugangstokens
+- private Audioaufnahmen
+- vertrauliche Transkripte
+- Screenshots mit sensiblen Inhalten
 
-- API keys of your model provider
-- access tokens
-- private audio recordings
-- confidential transcripts
-- screenshots that show sensitive content
-
-For security-sensitive reports, follow [SECURITY.md](SECURITY.md) instead of opening a public issue.
+Sicherheitsrelevante Meldungen laufen über [SECURITY.md](SECURITY.md), nicht über ein öffentliches Issue.

@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report something broken in Blitztext for macOS
+about: Report something broken in SprachZuText for macOS
 title: ""
 labels: bug
 assignees: ""

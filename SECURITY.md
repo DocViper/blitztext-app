@@ -1,6 +1,6 @@
 # Security Policy
 
-Blitztext is free and open source software.
+SprachZuText is free and open source software.
 
 It is provided as-is under the MIT License, without warranty or support guarantees.
 
@@ -34,4 +34,4 @@ Include:
 - Accessibility permission allows the app to paste text into the current app.
 - The app currently runs **without** the macOS App Sandbox. This is a deliberate trade-off: the menubar workflow needs Accessibility-based paste into arbitrary frontmost apps, system-wide hotkeys, and Application Support paths for local WhisperKit models, all of which are awkward or impossible inside a strict sandbox. Hardened Runtime is enabled, and the entitlements are limited to microphone input and outbound network access. Reintroducing the sandbox is on the roadmap once these flows are reworked.
 
-Do not use Blitztext for confidential or regulated data without your own review.
+Do not use SprachZuText for confidential or regulated data without your own review.

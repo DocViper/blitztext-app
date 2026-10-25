@@ -1,8 +1,8 @@
 # Contributing
 
-Thanks for taking a look at Blitztext.
+Thanks for taking a look at SprachZuText.
 
-Contributions should make Blitztext better to use, easier to learn from, build, fork, or safely extend.
+Contributions should make SprachZuText better to use, easier to learn from, build, fork, or safely extend.
 
 ## Good First Contributions
 
@@ -39,7 +39,7 @@ Keep changes small when possible. Avoid unrelated cleanup in the same PR.
 
 ## Project Boundaries
 
-Blitztext currently does not include:
+SprachZuText currently does not include:
 
 - other platforms (the iOS app is not public yet; Linux and Windows ports live in their own community projects, see the README)
 - a hosted backend or accounts

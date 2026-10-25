@@ -31,3 +31,5 @@ Secrets.swift
 # Tooling
 node_modules/
 build.log
+
+SprachZuText.app/

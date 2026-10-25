@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for Blitztext
+about: Suggest an idea for SprachZuText
 title: ""
 labels: enhancement
 assignees: ""

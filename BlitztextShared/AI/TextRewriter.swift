@@ -38,7 +38,7 @@ enum TextRewriter {
         case noModel
 
         var errorDescription: String? {
-            "Für diesen Modus braucht Blitztext Apple Intelligence oder einen API-Key in den Einstellungen."
+            "Für diesen Modus braucht SprachZuText Apple Intelligence oder einen API-Key in den Einstellungen."
         }
     }
 

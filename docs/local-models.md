@@ -1,6 +1,6 @@
 # Local Models
 
-All speech recognition in Blitztext runs on your Mac. The app does not bundle a model; it downloads the one you choose from Hugging Face into `~/Library/Application Support/Blitztext/models/`.
+All speech recognition in SprachZuText runs on your Mac. The app does not bundle a model; it downloads the one you choose from Hugging Face into `~/Library/Application Support/SprachZuText/models/`.
 
 ## Recommended Model
 
@@ -8,7 +8,7 @@ All speech recognition in Blitztext runs on your Mac. The app does not bundle a 
 
 ## Whisper Models
 
-WhisperKit Core ML models (about 100 languages, language detection), installed from the app or manually into `~/Library/Application Support/Blitztext/models/whisperkit/`:
+WhisperKit Core ML models (about 100 languages, language detection), installed from the app or manually into `~/Library/Application Support/SprachZuText/models/whisperkit/`:
 
 - [openai_whisper-small_216MB](https://huggingface.co/argmaxinc/whisperkit-coreml/tree/main/openai_whisper-small_216MB)
 - Whisper Large v3 Turbo, in one of two builds with the same weights: the streaming build on M2 and newer, the plain build on M1 and Intel Macs:
@@ -32,7 +32,7 @@ python3 -m pip install --upgrade "huggingface_hub[cli]"
 Create the local model cache:
 
 ```bash
-mkdir -p "$HOME/Library/Application Support/Blitztext/models/whisperkit"
+mkdir -p "$HOME/Library/Application Support/SprachZuText/models/whisperkit"
 ```
 
 Download the recommended first model:
@@ -40,14 +40,14 @@ Download the recommended first model:
 ```bash
 hf download argmaxinc/whisperkit-coreml \
   --include 'openai_whisper-small_216MB/*' \
-  --local-dir "$HOME/Library/Application Support/Blitztext/models/whisperkit" \
+  --local-dir "$HOME/Library/Application Support/SprachZuText/models/whisperkit" \
   --max-workers 4
 ```
 
 Expected folder layout:
 
 ```text
-~/Library/Application Support/Blitztext/models/whisperkit/
+~/Library/Application Support/SprachZuText/models/whisperkit/
   openai_whisper-small_216MB/
     AudioEncoder.mlmodelc/
     MelSpectrogram.mlmodelc/

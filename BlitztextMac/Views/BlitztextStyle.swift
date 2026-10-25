@@ -351,13 +351,13 @@ struct ModeIcon: View {
 struct BrandRow: View {
     var body: some View {
         HStack(spacing: 9) {
-            BlackboatMark()
-                .fill(Color.primary)
+            Image(systemName: "mic.fill")
+                .font(.system(size: 20, weight: .semibold))
                 .frame(width: 24, height: 24)
             VStack(alignment: .leading, spacing: 0) {
-                Text("Blitztext")
+                Text("SprachZuText")
                     .font(.ui(15, .bold))
-                Text("by Blackboat")
+                Text("für Intel-Mac")
                     .font(.ui(11))
                     .foregroundStyle(.secondary)
             }

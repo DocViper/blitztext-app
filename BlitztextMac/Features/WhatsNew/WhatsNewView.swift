@@ -4,7 +4,7 @@ import SwiftUI
 /// or right after the first dictation for people who only use the shortcuts.
 enum WhatsNew {
     /// Bump together with the items when a release deserves a note.
-    static let version = "1.13"
+    static let version = "1.0"
 
     struct Item: Identifiable {
         let icon: String
@@ -15,14 +15,14 @@ enum WhatsNew {
 
     static let items: [Item] = [
         Item(
-            icon: "bubble.left.fill",
-            title: "Neues Aussehen",
-            detail: "Blitztext sieht jetzt aus wie auf dem iPhone: klare Karten, Blackboat-Farben und die Sprechblase. Die Modi zeigen ihre Farbe, dein letzter Text steht als Nachricht bereit und ist mit einem Klick kopiert."
+            icon: "cpu",
+            title: "F\u{00FC}r Intel-Macs angepasst",
+            detail: "Diese Version l\u{00E4}uft auch auf Macs mit Intel-Prozessor. Die Spracherkennung rechnet dort nur mit dem Prozessor und ist deshalb langsamer als auf Apple-Chips. Ein kurzer Satz kann mit dem kleinen Modell etwa eine halbe Minute dauern."
         ),
         Item(
-            icon: "waveform",
-            title: "Aufnahme sichtbar",
-            detail: "Unten am Bildschirm zeigt eine kleine lila Anzeige, dass Blitztext zuh\u{00F6}rt. Sie bewegt sich mit deiner Stimme, ein Klick stoppt die Aufnahme. Abschalten kannst du sie unter Einstellungen, Allgemein."
+            icon: "info.circle",
+            title: "Inoffizieller Fork",
+            detail: "SprachZuText ist ein unabh\u{00E4}ngiger Fork des Open-Source-Projekts Blitztext und kommt nicht von Blackboat. Quellcode und Lizenzen findest du in den Einstellungen unter \u{201E}\u{00DC}ber SprachZuText\u{201C}."
         ),
     ]
 }
@@ -37,7 +37,7 @@ struct WhatsNewView: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Neu in Blitztext \(WhatsNew.version)")
+                Text("Neu in SprachZuText \(WhatsNew.version)")
                     .font(BlackboatType.publicSans(20, .bold, relativeTo: .title3))
                 Text("Einmal kurz, dann geht es weiter wie gewohnt.")
                     .font(.ui(12))
@@ -72,13 +72,13 @@ struct WhatsNewView: View {
                     NoticeRow(
                         icon: "arrow.down.circle",
                         title: "Noch ein Schritt",
-                        detail: "Lade einmal ein lokales Sprachmodell, sonst kann Blitztext nicht transkribieren."
+                        detail: "Lade einmal ein lokales Sprachmodell, sonst kann SprachZuText nicht transkribieren."
                     )
                 } else if !appState.canRewrite {
                     NoticeRow(
                         icon: "key",
                         title: "KI-Modi einrichten",
-                        detail: "Ohne Apple Intelligence brauchen Blitztext+, $%&! und :) einen eigenen API-Key."
+                        detail: "Ohne Apple Intelligence brauchen SprachZuText+, $%&! und :) einen eigenen API-Key."
                     )
                 }
             }

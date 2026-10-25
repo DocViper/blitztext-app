@@ -14,7 +14,7 @@ enum UnmeteredNetwork {
                 monitor.cancel()
                 continuation.resume(returning: path.status == .satisfied && !path.isExpensive && !path.isConstrained)
             }
-            monitor.start(queue: DispatchQueue(label: "app.blitztext.unmetered-network"))
+            monitor.start(queue: DispatchQueue(label: "io.github.docviper.sprachzutext.unmetered-network"))
         }
     }
 

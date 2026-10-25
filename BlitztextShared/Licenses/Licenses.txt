@@ -1,4 +1,4 @@
-Blitztext: Lizenzen und Hinweise / Licenses and notices
+SprachZuText: Lizenzen und Hinweise / Licenses and notices
 ========================================================
 
 # Third-Party Notices

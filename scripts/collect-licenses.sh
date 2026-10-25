@@ -14,7 +14,7 @@ OUT="$ROOT/BlitztextShared/Licenses/Licenses.txt"
 mkdir -p "$(dirname "$OUT")"
 
 {
-    echo "Blitztext: Lizenzen und Hinweise / Licenses and notices"
+    echo "SprachZuText: Lizenzen und Hinweise / Licenses and notices"
     echo "========================================================"
     echo
     cat "$ROOT/THIRD_PARTY_NOTICES.md"

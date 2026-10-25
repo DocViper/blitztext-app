@@ -41,7 +41,7 @@ struct AppModeRulesSection: View {
 
     var body: some View {
         SettingsSection(title: "Modus je App") {
-            Text("Das Blitztext-K\u{00FC}rzel (\(appState.hotkeyLabel(for: .tapTalk))) kann je App oder Website automatisch einen anderen Modus nutzen, zum Beispiel Blitztext+ in Gmail. \u{00DC}berall sonst bleibt es wortgenau, und die \u{00FC}brigen K\u{00FC}rzel bleiben wie sie sind.")
+            Text("Das SprachZuText-K\u{00FC}rzel (\(appState.hotkeyLabel(for: .tapTalk))) kann je App oder Website automatisch einen anderen Modus nutzen, zum Beispiel SprachZuText+ in Gmail. \u{00DC}berall sonst bleibt es wortgenau, und die \u{00FC}brigen K\u{00FC}rzel bleiben wie sie sind.")
                 .font(.ui(12))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -108,7 +108,7 @@ struct AppModeRulesSection: View {
             }
 
             if !websiteRules.isEmpty {
-                Text("Websites erkennt Blitztext in Safari, Chrome, Edge, Brave, Arc und Firefox. Eine Website-Regel gilt vor der Regel f\u{00FC}r den Browser.")
+                Text("Websites erkennt SprachZuText in Safari, Chrome, Edge, Brave, Arc und Firefox. Eine Website-Regel gilt vor der Regel f\u{00FC}r den Browser.")
                     .font(.ui(12))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -116,7 +116,7 @@ struct AppModeRulesSection: View {
 
             if (rules.contains(where: { $0.mode != .tapTalk }) || websiteRules.contains(where: { $0.mode != .tapTalk }))
                 && !appState.canRewrite {
-                Text("KI-Modi brauchen Apple Intelligence oder einen API-Key. Bis dahin diktiert Blitztext dort wortgenau.")
+                Text("KI-Modi brauchen Apple Intelligence oder einen API-Key. Bis dahin diktiert SprachZuText dort wortgenau.")
                     .font(.ui(12))
                     .foregroundStyle(BlitztextTheme.danger)
                     .fixedSize(horizontal: false, vertical: true)

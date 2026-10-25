@@ -224,7 +224,7 @@ struct RecordingPill: View {
     private var accessibilityText: String {
         switch model.status {
         case .recording: return "Aufnahme l\u{00E4}uft. Klicken stoppt sie."
-        case .processing: return "Blitztext schreibt"
+        case .processing: return "SprachZuText schreibt"
         case .success: return "Fertig"
         case .idle, .error: return ""
         }

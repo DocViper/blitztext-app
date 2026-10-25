@@ -1,6 +1,6 @@
 name: BlitztextMac
 options:
-  bundleIdPrefix: app.blitztext
+  bundleIdPrefix: io.github.docviper
   deploymentTarget:
     macOS: "14.0"
   xcodeVersion: "15.0"
@@ -11,14 +11,14 @@ settings:
     SWIFT_VERSION: "5.10"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
     ONLY_ACTIVE_ARCH: NO
-    MARKETING_VERSION: "1.13"
-    CURRENT_PROJECT_VERSION: "39"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
     # In-app updates for installs outside Jamf (Sparkle). The feed is the appcast of the
     # latest public GitHub release; the key is the public half of the signing key.
-    SPARKLE_FEED_URL: "https://github.com/cmagnussen/blitztext-app/releases/latest/download/appcast.xml"
+    SPARKLE_FEED_URL: ""
     # Name in Finder and the Dock; a design preview builds as "Blitztext Vorschau".
-    APP_DISPLAY_NAME: Blitztext
-    SPARKLE_PUBLIC_ED_KEY: "E3+VuN7OgR+preZ8H1a73gmDhNDeqvznjUxxpO8kzMM="
+    APP_DISPLAY_NAME: "SprachZuText für Intel-Mac"
+    SPARKLE_PUBLIC_ED_KEY: ""
 
 packages:
   Sparkle:
@@ -50,8 +50,8 @@ targets:
           - BlitztextMac.entitlements
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.blitztext.mac
-        PRODUCT_NAME: Blitztext
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.docviper.sprachzutext
+        PRODUCT_NAME: SprachZuText
         INFOPLIST_FILE: Resources/Info.plist
         INFOPLIST_KEY_CFBundleShortVersionString: $(MARKETING_VERSION)
         INFOPLIST_KEY_CFBundleVersion: $(CURRENT_PROJECT_VERSION)
@@ -92,5 +92,5 @@ targets:
       - path: ../BlitztextShared/Transcription/HallucinationFilter.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.blitztext.mac.tests
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.docviper.sprachzutext.tests
         GENERATE_INFOPLIST_FILE: YES
