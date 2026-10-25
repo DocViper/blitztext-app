@@ -183,5 +183,7 @@ final class HotkeyService {
         }
     }
 
+    #if compiler(>=6.1)
     nonisolated deinit {}
+    #endif
 }

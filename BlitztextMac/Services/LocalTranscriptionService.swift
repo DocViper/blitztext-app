@@ -428,6 +428,12 @@ actor LocalTranscriptionService {
             try await WhisperKit(
                 modelFolder: url.path,
                 tokenizerFolder: AppSupportPaths.whisperKitTokenizersDirectoryURL,
+                computeOptions: ModelComputeOptions(
+                    melCompute: .cpuOnly,
+                    audioEncoderCompute: .cpuOnly,
+                    textDecoderCompute: .cpuOnly,
+                    prefillCompute: .cpuOnly
+                ),
                 verbose: false,
                 prewarm: true,
                 load: true,

@@ -1,0 +1,180 @@
+diff --git a/Sources/ArgmaxCore/MLMultiArrayExtensions.swift b/Sources/ArgmaxCore/MLMultiArrayExtensions.swift
+index 309ec58..5e49375 100644
+--- a/Sources/ArgmaxCore/MLMultiArrayExtensions.swift
++++ b/Sources/ArgmaxCore/MLMultiArrayExtensions.swift
+@@ -31,10 +31,18 @@ public extension MLMultiArray {
+                     typedPointer.initialize(repeating: value, count: count)
+                 }
+             case .float16:
++                #if (os(macOS) || targetEnvironment(macCatalyst)) && arch(x86_64)
++                // Intel: FloatType is Float (4 bytes), but the buffer holds half floats (2 bytes).
++                if let value = initialValue as? Float {
++                    let typedPointer = dataPointer.bindMemory(to: UInt16.self, capacity: count)
++                    typedPointer.initialize(repeating: Self.halfBits(from: value), count: count)
++                }
++                #else
+                 if let value = initialValue as? FloatType {
+                     let typedPointer = dataPointer.bindMemory(to: FloatType.self, capacity: count)
+                     typedPointer.initialize(repeating: value, count: count)
+                 }
++                #endif
+             case .int32:
+                 if let value = initialValue as? Int32 {
+                     let typedPointer = dataPointer.bindMemory(to: Int32.self, capacity: count)
+@@ -53,6 +61,50 @@ public extension MLMultiArray {
+         }
+     }
+ 
++    /// Converts a Float to IEEE 754 half-precision bits (used on Intel, where Float16 is unavailable).
++    static func halfBits(from value: Float) -> UInt16 {
++        let b = value.bitPattern
++        let sign = UInt16((b >> 16) & 0x8000)
++        let exp = Int((b >> 23) & 0xFF)
++        let mant = b & 0x7FFFFF
++        if exp == 0xFF { return sign | 0x7C00 | (mant != 0 ? 0x200 : 0) }
++        let e = exp - 127 + 15
++        if e >= 31 { return sign | 0x7C00 }
++        if e <= 0 {
++            if e < -10 { return sign }
++            let m = (mant | 0x800000) >> UInt32(1 - e)
++            return sign | UInt16(truncatingIfNeeded: (m + 0x1000) >> 13)
++        }
++        let rounded = (UInt32(e) << 10) + ((mant + 0x1000) >> 13)
++        return sign | UInt16(truncatingIfNeeded: rounded)
++    }
++
++    /// Converts half-precision bits to Float.
++    static func floatFromHalfBits(_ h: UInt16) -> Float {
++        let sign = UInt32(h & 0x8000) << 16
++        let exp = UInt32((h >> 10) & 0x1F)
++        let mant = UInt32(h & 0x3FF)
++        if exp == 0 {
++            let v = Float(mant) / 16777216.0
++            return sign != 0 ? -v : v
++        }
++        if exp == 31 { return Float(bitPattern: sign | 0x7F800000 | (mant << 13)) }
++        return Float(bitPattern: sign | ((exp + 112) << 23) | (mant << 13))
++    }
++
++    /// Returns a contiguous Float32 copy of a float16 [1, 1, n] array; other arrays are returned unchanged.
++    func float32Copy() -> MLMultiArray {
++        guard dataType == .float16,
++              let out = try? MLMultiArray(shape: shape, dataType: .float32) else { return self }
++        let src = UnsafeMutablePointer<UInt16>(OpaquePointer(dataPointer))
++        let dst = out.dataPointer.bindMemory(to: Float.self, capacity: out.count)
++        let lastStride = strides[strides.count - 1].intValue
++        for i in 0..<count {
++            dst[i] = Self.floatFromHalfBits(src[i * lastStride])
++        }
++        return out
++    }
++
+     /// Creates an MLMultiArray from an [Int] array.
+     /// Values are stored in the last dimension (default is dims=1).
+     static func from(_ array: [Int], dims: Int = 1) throws -> MLMultiArray {
+@@ -85,6 +137,17 @@ public extension MLMultiArray {
+     /// Requires shape [1, 1, n].
+     func fillLastDimension(indexes: Range<Int>, with value: FloatType) {
+         precondition(shape.count == 3 && shape[0] == 1 && shape[1] == 1, "Must have [1, 1, n] shape")
++        #if (os(macOS) || targetEnvironment(macCatalyst)) && arch(x86_64)
++        if dataType == .float16 {
++            let half = Self.halfBits(from: value)
++            let halfPointer = UnsafeMutablePointer<UInt16>(OpaquePointer(dataPointer))
++            let lastStride = strides[2].intValue
++            for index in indexes {
++                halfPointer[index * lastStride] = half
++            }
++            return
++        }
++        #endif
+         withUnsafeMutableBufferPointer(ofType: FloatType.self) { ptr, strides in
+             for index in indexes {
+                 ptr[index * strides[2]] = value
+@@ -94,8 +157,18 @@ public extension MLMultiArray {
+ 
+     /// Fills specific multi-dimensional indices with a value.
+     func fill<Value>(indexes: [[NSNumber]], with value: Value) {
+-        let pointer = UnsafeMutablePointer<Value>(OpaquePointer(dataPointer))
+         let strideInts = strides.map { $0.intValue }
++        #if (os(macOS) || targetEnvironment(macCatalyst)) && arch(x86_64)
++        if dataType == .float16, let f = value as? Float {
++            let half = Self.halfBits(from: f)
++            let halfPointer = UnsafeMutablePointer<UInt16>(OpaquePointer(dataPointer))
++            for index in indexes {
++                halfPointer[linearOffset(for: index, strides: strideInts)] = half
++            }
++            return
++        }
++        #endif
++        let pointer = UnsafeMutablePointer<Value>(OpaquePointer(dataPointer))
+         for index in indexes {
+             let linearOffset = linearOffset(for: index, strides: strideInts)
+             pointer[linearOffset] = value
+diff --git a/Sources/WhisperKit/Core/Text/LogitsFilter.swift b/Sources/WhisperKit/Core/Text/LogitsFilter.swift
+index b3f18f1..5aa2c65 100644
+--- a/Sources/WhisperKit/Core/Text/LogitsFilter.swift
++++ b/Sources/WhisperKit/Core/Text/LogitsFilter.swift
+@@ -143,6 +143,9 @@ open class TimestampRulesFilter: LogitsFiltering {
+     }
+ 
+     private func sumOfProbabilityOverTimestampsIsAboveAnyOtherToken(logits: MLMultiArray, timeTokenBegin: Int) -> Bool {
++        #if (os(macOS) || targetEnvironment(macCatalyst)) && arch(x86_64)
++        let logits = logits.float32Copy()
++        #endif
+         let timeTokenBeginOffset = logits.linearOffset(for: [0, 0, timeTokenBegin as NSNumber])
+ 
+         let logprobsInputPointer = UnsafeMutableRawBufferPointer(
+diff --git a/Sources/WhisperKit/Core/Text/SegmentSeeker.swift b/Sources/WhisperKit/Core/Text/SegmentSeeker.swift
+index fbc4379..2df2f80 100644
+--- a/Sources/WhisperKit/Core/Text/SegmentSeeker.swift
++++ b/Sources/WhisperKit/Core/Text/SegmentSeeker.swift
+@@ -453,10 +453,10 @@ open class SegmentSeeker: SegmentSeeking {
+         alignmentWeights.withUnsafeMutableBytes { weightsPointer, weightsStride in
+             filteredAlignmentWeights.withUnsafeMutableBytes { filteredWeightsPointer, filteredWeightsStride in
+                 for (newIndex, originalIndex) in filteredIndices.enumerated() {
+-                    let sourcePointer = weightsPointer.baseAddress!.advanced(by: Int(originalIndex * columnCount * MemoryLayout<FloatType>.stride))
+-                    let destinationPointer = filteredWeightsPointer.baseAddress!.advanced(by: Int(newIndex * columnCount * MemoryLayout<FloatType>.stride))
++                    let sourcePointer = weightsPointer.baseAddress!.advanced(by: Int(originalIndex * columnCount * 2 /* float16 bytes */))
++                    let destinationPointer = filteredWeightsPointer.baseAddress!.advanced(by: Int(newIndex * columnCount * 2 /* float16 bytes */))
+ 
+-                    memcpy(destinationPointer, sourcePointer, columnCount * MemoryLayout<FloatType>.stride)
++                    memcpy(destinationPointer, sourcePointer, columnCount * 2 /* float16 bytes */)
+                 }
+             }
+         }
+diff --git a/Sources/WhisperKit/Core/Text/TokenSampler.swift b/Sources/WhisperKit/Core/Text/TokenSampler.swift
+index 8d71051..17b23b7 100644
+--- a/Sources/WhisperKit/Core/Text/TokenSampler.swift
++++ b/Sources/WhisperKit/Core/Text/TokenSampler.swift
+@@ -84,6 +84,9 @@ open class GreedyTokenSampler: TokenSampling {
+     #endif
+ 
+     private func sampleWithBNNS(logits: MLMultiArray) -> (token: Int, logprob: Float) {
++        #if (os(macOS) || targetEnvironment(macCatalyst)) && arch(x86_64)
++        let logits = logits.float32Copy()
++        #endif
+         // TODO: BNNS operations here are deprecated, replace with vDSP or MLX
+         var softmaxOutput: BNNSNDArrayDescriptor?
+         var argmaxOutput: BNNSNDArrayDescriptor?
+diff --git a/Sources/WhisperKit/Core/TextDecoder.swift b/Sources/WhisperKit/Core/TextDecoder.swift
+index 6581536..f77ee61 100644
+--- a/Sources/WhisperKit/Core/TextDecoder.swift
++++ b/Sources/WhisperKit/Core/TextDecoder.swift
+@@ -419,7 +419,7 @@ public extension TextDecoding {
+         let tensorShape = keyTensor.shape.map { $0.intValue }
+         let sliceShape = keySlice.shape.map { $0.intValue }
+         let sliceStrides = keySlice.strides.map { $0.intValue } // same for val
+-        let bytesPerSample = MemoryLayout<FloatType>.size
++        let bytesPerSample = 2 // CoreML buffers hold float16 (2 bytes)
+ 
+         keyTensor.withUnsafeMutableBytes { keyTensorPointer, keyTargetStrides in
+             keySlice.withUnsafeBytes { keySlicePointer in
+@@ -459,7 +459,7 @@ public extension TextDecoding {
+     ) {
+         let tensorShape = alignmentTensor.shape.map { $0.intValue }
+         let sliceStrides = alignmentSlice.strides.map { $0.intValue }
+-        let bytesPerSample = MemoryLayout<FloatType>.size
++        let bytesPerSample = 2 // CoreML buffers hold float16 (2 bytes)
+ 
+         alignmentTensor.withUnsafeMutableBytes { alignmentPointer, alignmentStrides in
+             alignmentSlice.withUnsafeBytes { slicePointer in

@@ -106,9 +106,11 @@ final class ClipboardPasteService {
     /// before apps read the clipboard on their own). Restoring that empty snapshot would wipe
     /// the transcript as well, so the transcript is better left in place.
     private func readableSnapshot() -> ClipboardSnapshot? {
+        #if compiler(>=6.1)
         if #available(macOS 15.4, *), pasteboard.accessBehavior == .alwaysDeny {
             return nil
         }
+        #endif
         let listsContent = !(pasteboard.types ?? []).isEmpty
         let snapshot = ClipboardSnapshot(of: pasteboard)
         if listsContent && snapshot.isEmpty {
