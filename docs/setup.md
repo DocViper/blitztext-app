@@ -1,43 +1,50 @@
-# Setup
+# Einrichtung
 
-## 1. Install
+## 1. Bauen und installieren
 
-Either download the signed app from the [releases page](https://github.com/cmagnussen/blitztext-app/releases/latest), or build it:
+Es gibt keine fertige, signierte App zum Herunterladen. Du baust sie selbst.
+
+Voraussetzungen: ein Mac mit **Intel-Prozessor**, macOS 14 oder neuer, Xcode 16.2 oder neuer (getestet mit Xcode 16.2 unter macOS 14.6.1), Git und [XcodeGen](https://github.com/yonaskolb/XcodeGen).
 
 ```bash
 brew install xcodegen
-git clone https://github.com/cmagnussen/blitztext-app.git
-cd blitztext-app
+git clone https://github.com/DocViper/sprachzutext-intel.git
+cd sprachzutext-intel
 ./build.sh --install --run
 ```
 
-The app is installed to `/Applications/Blitztext.app` and appears in the menu bar.
+Das Skript lädt die Swift-Pakete, wendet den Intel-Patch für WhisperKit an (`patches/whisperkit-intel.patch`), baut die App nur für Intel und legt sie als `/Applications/SprachZuText.app` ab. Sie erscheint in der Menüleiste. Der erste Bau dauert auf älteren Macs einige Minuten.
 
-## 2. Permissions
+Die App ist nur "ad hoc" signiert. Das genügt für den eigenen Mac.
 
-- **Microphone:** to record.
-- **Accessibility:** to paste into the app you are using. Without it, results stay on the clipboard.
+## 2. Berechtigungen
 
-If paste stops working after an update or rebuild, open **System Settings > Privacy & Security > Accessibility**, remove old Blitztext entries, add the current app and restart Blitztext.
+- **Mikrofon:** zum Aufnehmen.
+- **Bedienungshilfen:** zum Einfügen in die App, in der du gerade schreibst. Ohne sie bleibt das Ergebnis in der Zwischenablage.
 
-## 3. Local Speech Model
+Nach jedem Neubau ändert sich die Signatur. Dann öffnest du **Systemeinstellungen > Datenschutz & Sicherheit > Bedienungshilfen**, entfernst den alten Eintrag von SprachZuText, fügst die aktuelle App hinzu und startest sie neu. Hilft das nicht, setzt du die Freigabe im Terminal zurück: `tccutil reset Accessibility io.github.docviper.sprachzutext`.
 
-Open **Settings > Modelle > Spracherkennung**, pick a model and load it once:
+## 3. Lokales Sprachmodell
 
-- **Parakeet Ultra** (recommended on Apple silicon): fast, 25 European languages, about 630 MB.
-- **Whisper Large v3 Turbo / Small:** about 100 languages, slower.
+Öffne **Einstellungen > Modelle > Spracherkennung**, wähle ein Whisper-Modell und lade es einmal:
 
-After a macOS update the first dictation can take a few minutes while macOS prepares the model for the Neural Engine. Blitztext shows a hint; keep it running.
+- **Whisper Small:** schneller, für kurze Diktate meist ausreichend.
+- **Whisper Large v3 Turbo:** genauer, aber langsamer.
 
-## 4. Writing Modes
+Die Spracherkennung rechnet auf Intel-Macs nur mit dem Prozessor. Zum Vergleich, gemessen auf einem iMac von 2015: Ein kurzer Satz dauert mit Small etwa 45 Sekunden und mit Large v3 Turbo etwa 70 Sekunden. Auf neueren Intel-Macs geht es schneller.
 
-Blitztext+, $%&! and :) need a language model:
+Parakeet Ultra braucht Apple Silicon und steht auf Intel-Macs nicht zur Verfügung.
 
-- **Apple Intelligence** (macOS 26, turned on in System Settings): runs on your Mac. Nothing to configure.
-- **Your own model provider** (optional): **Settings > Modelle > Modell-Anbieter**, choose a provider, paste your API key, test the connection. Local servers such as Ollama or LM Studio work via "Eigene Adresse".
+## 4. Schreibmodi
 
-## 5. Shortcuts
+Die Modi mit KI (SprachZuText+, $%&!, :)) brauchen ein Sprachmodell. Apple Intelligence setzt Apple Silicon voraus und fehlt deshalb auf Intel-Macs. Du brauchst einen eigenen Modell-Anbieter:
 
-`fn` shortcuts only work on Apple keyboards. For other keyboards set your own shortcut per mode in **Settings > Allgemein > Tastenkürzel** (e.g. `⌃⌥D` or `F13`). An own shortcut replaces the `fn` shortcut of that mode. `fn` itself cannot be part of an own shortcut.
+**Einstellungen > Modelle > Modell-Anbieter**, Anbieter wählen, API-Schlüssel eintragen, Verbindung testen. Lokale Server wie Ollama oder LM Studio funktionieren über "Eigene Adresse".
 
-**Halten:** hold to record, release to process. **Drücken:** press to start, press again or `Esc` to stop.
+Das wortgenaue Diktieren funktioniert auch ohne Anbieter.
+
+## 5. Tastenkürzel
+
+Die `fn`-Kürzel funktionieren nur auf Apple-Tastaturen. Auf anderen Tastaturen legst du unter **Einstellungen > Allgemein > Tastenkürzel** ein eigenes Kürzel pro Modus fest, zum Beispiel `⌃⌥D` oder `F13`. Ein eigenes Kürzel ersetzt das `fn`-Kürzel dieses Modus. `fn` selbst kann nicht Teil eines eigenen Kürzels sein.
+
+**Halten:** gedrückt halten zum Aufnehmen, loslassen zum Verarbeiten. **Drücken:** drücken zum Starten, nochmal drücken oder `Esc` zum Beenden.

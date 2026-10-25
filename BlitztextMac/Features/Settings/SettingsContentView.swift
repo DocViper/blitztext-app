@@ -306,7 +306,7 @@ struct AboutBlitztextSection: View {
     @State private var cleanupStatusText: String?
     @State private var cleanupErrorText: String?
 
-    static let repositoryURL = "https://github.com/DocViper/blitztext-app"
+    static let repositoryURL = "https://github.com/DocViper/sprachzutext-intel"
 
     var body: some View {
         SettingsSection(title: "\u{00DC}ber SprachZuText") {

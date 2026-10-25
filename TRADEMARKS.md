@@ -9,6 +9,5 @@ Laut dem Original gehören Projektname, App-Name, Logos, Icons und das visuelle 
 - Der Name dieser App ist "SprachZuText für Intel-Mac".
 - Das App-Icon und das Menüleisten-Symbol wurden für diesen Fork neu gezeichnet.
 - Logo, Slogan und Screenshots des Originals wurden entfernt.
-- Der Repository-Name `blitztext-app` ergibt sich aus dem GitHub-Fork und ist kein Produktname dieser App.
 
 Wer diesen Fork weiterverbreitet, verwendet bitte einen eigenen Namen und ein eigenes Icon.

@@ -41,8 +41,8 @@ Ohne Neural Engine und GPU ist die Spracherkennung langsam. Auf dem iMac von 201
 Es gibt keine fertige App zum Herunterladen, du baust sie selbst. Du brauchst einen Mac mit Intel-Prozessor, macOS 14 oder neuer, Xcode 16.2 oder neuer, Git und [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
 
 ```bash
-git clone https://github.com/DocViper/blitztext-app.git
-cd blitztext-app
+git clone https://github.com/DocViper/sprachzutext-intel.git
+cd sprachzutext-intel
 ./build.sh --install --run
 ```
 
